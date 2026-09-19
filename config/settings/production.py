@@ -37,7 +37,7 @@ MIDDLEWARE.insert(
     'whitenoise.middleware.WhiteNoiseMiddleware'
 )
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # ===================== الأمان =====================
 SECURE_BROWSER_XSS_FILTER = True
