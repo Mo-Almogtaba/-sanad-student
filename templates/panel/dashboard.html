@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}لوحة التحكم - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/panel.css' %}">
+
+<div class="page-hero">
+    <h1>🎛️ لوحة التحكم</h1>
+    <p>مرحباً، {{ user.get_full_name|default:user.username }}</p>
+</div>
+
+<div class="container py-5">
+
+    <!-- ✅ بطاقات الإحصائيات -->
+    <div class="panel-stats-grid">
+        
+        {% if has_applications_access %}
+        <a href="{% url 'panel:applications' %}" class="panel-stat-card card-blue">
+            <div class="stat-icon">📝</div>
+            <div class="stat-number">{{ stats.applications.total }}</div>
+            <div class="stat-label">طلبات التقديم</div>
+            <span class="stat-subtext">
+                <i class="fa-solid fa-bolt"></i>
+                جديد اليوم: {{ stats.applications.today }}
+            </span>
+        </a>
+        {% endif %}
+
+        {% if has_certificates_access %}
+        <a href="{% url 'panel:certificates' %}" class="panel-stat-card card-green">
+            <div class="stat-icon">📜</div>
+            <div class="stat-number">{{ stats.certificates.total }}</div>
+            <div class="stat-label">طلبات الشهادات</div>
+            <span class="stat-subtext">
+                <i class="fa-solid fa-bolt"></i>
+                جديد اليوم: {{ stats.certificates.today }}
+            </span>
+        </a>
+        {% endif %}
+
+        {% if has_contact_access %}
+        <a href="{% url 'panel:contact' %}" class="panel-stat-card card-orange">
+            <div class="stat-icon">💬</div>
+            <div class="stat-number">{{ stats.contact.total }}</div>
+            <div class="stat-label">رسائل الاتصال</div>
+            <span class="stat-subtext">
+                <i class="fa-solid fa-envelope"></i>
+                جديد: {{ stats.contact.new }}
+            </span>
+        </a>
+        {% endif %}
+
+        {% if has_access_access %}
+        <a href="{% url 'panel:access' %}" class="panel-stat-card card-purple">
+            <div class="stat-icon">🔑</div>
+            <div class="stat-number">{{ stats.access.active }}</div>
+            <div class="stat-label">أكواد نشطة</div>
+            <span class="stat-subtext">
+                <i class="fa-solid fa-clock"></i>
+                قيد الانتظار: {{ stats.access.pending }}
+            </span>
+        </a>
+        {% endif %}
+
+        {% if has_announcements_access %}
+        <a href="{% url 'panel:announcements' %}" class="panel-stat-card" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);">
+            <div class="stat-icon">📢</div>
+            <div class="stat-number">—</div>
+            <div class="stat-label">الإعلانات</div>
+            <span class="stat-subtext">
+                <i class="fa-solid fa-bullhorn"></i>
+                البانر المتحرك
+            </span>
+        </a>
+        {% endif %}
+
+        {% if has_guide_access %}
+        <a href="{% url 'panel:guide_sections' %}" class="panel-stat-card" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);">
+            <div class="stat-icon">📖</div>
+            <div class="stat-number">—</div>
+            <div class="stat-label">دليل التقديم</div>
+            <span class="stat-subtext">
+                <i class="fa-solid fa-book-open"></i>
+                الأقسام والكروت
+            </span>
+        </a>
+        {% endif %}
+
+        {% if has_data_entry_access %}
+        <a href="{% url 'panel:data_entry' %}" class="panel-stat-card" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%);">
+            <div class="stat-icon">📊</div>
+            <div class="stat-number">—</div>
+            <div class="stat-label">بيانات الجامعات</div>
+            <span class="stat-subtext">
+                <i class="fa-solid fa-database"></i>
+                إدخال البيانات
+            </span>
+        </a>
+        {% endif %}
+
+        {% if is_super_admin %}
+        <a href="{% url 'panel:team' %}" class="panel-stat-card" style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);">
+            <div class="stat-icon">👥</div>
+            <div class="stat-number">—</div>
+            <div class="stat-label">إدارة الفريق</div>
+            <span class="stat-subtext">
+                <i class="fa-solid fa-users"></i>
+                الأعضاء والصلاحيات
+            </span>
+        </a>
+        {% endif %}
+
+    </div>
+
+    <!-- ✅ آخر الطلبات -->
+    <div class="row g-4">
+        
+        {% if has_applications_access %}
+        <div class="col-lg-6">
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fa-solid fa-file-alt"></i>
+                    <h3>📥 آخر طلبات التقديم</h3>
+                </div>
+                {% if recent.applications %}
+                    {% for app in recent.applications %}
+                        <a href="{% url 'panel:application_detail' app.pk %}" class="recent-item" style="text-decoration:none; color:inherit;">
+                            <div class="item-info">
+                                <h6>{{ app.full_name }}</h6>
+                                <div class="item-meta">
+                                    <span class="badge-mini">{{ app.application_code }}</span>
+                                    <span>{{ app.get_status_display }}</span>
+                                    <span>{{ app.submitted_at|timesince }} مضت</span>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-left" style="color:#94a3b8;"></i>
+                        </a>
+                    {% endfor %}
+                    <a href="{% url 'panel:applications' %}" class="btn-outline" style="display:block; text-align:center; margin-top:15px;">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        عرض الكل ({{ stats.applications.total }})
+                    </a>
+                {% else %}
+                    <p class="text-muted text-center py-3">
+                        <i class="fa-solid fa-inbox fa-2x d-block mb-2"></i>
+                        لا توجد طلبات بعد
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if has_certificates_access %}
+        <div class="col-lg-6">
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fa-solid fa-certificate"></i>
+                    <h3>📜 آخر طلبات الشهادات</h3>
+                </div>
+                {% if recent.certificates %}
+                    {% for cert in recent.certificates %}
+                        <a href="{% url 'panel:certificate_detail' cert.pk %}" class="recent-item" style="text-decoration:none; color:inherit;">
+                            <div class="item-info">
+                                <h6>{{ cert.full_name }}</h6>
+                                <div class="item-meta">
+                                    <span class="badge-mini">{{ cert.request_code }}</span>
+                                    <span>{{ cert.get_status_display }}</span>
+                                    <span>{{ cert.submitted_at|timesince }} مضت</span>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-left" style="color:#94a3b8;"></i>
+                        </a>
+                    {% endfor %}
+                    <a href="{% url 'panel:certificates' %}" class="btn-outline" style="display:block; text-align:center; margin-top:15px;">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        عرض الكل ({{ stats.certificates.total }})
+                    </a>
+                {% else %}
+                    <p class="text-muted text-center py-3">
+                        <i class="fa-solid fa-inbox fa-2x d-block mb-2"></i>
+                        لا توجد طلبات بعد
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if has_contact_access %}
+        <div class="col-lg-6">
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fa-solid fa-envelope"></i>
+                    <h3>💬 آخر رسائل الاتصال</h3>
+                </div>
+                {% if recent.contact %}
+                    {% for msg in recent.contact %}
+                        <a href="{% url 'panel:contact_detail' msg.pk %}" class="recent-item" style="text-decoration:none; color:inherit;">
+                            <div class="item-info">
+                                <h6>{{ msg.full_name }}</h6>
+                                <div class="item-meta">
+                                    <span class="badge-mini">{{ msg.message_code }}</span>
+                                    <span>{{ msg.scope_display }}</span>
+                                    <span>{{ msg.submitted_at|timesince }} مضت</span>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-left" style="color:#94a3b8;"></i>
+                        </a>
+                    {% endfor %}
+                    <a href="{% url 'panel:contact' %}" class="btn-outline" style="display:block; text-align:center; margin-top:15px;">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        عرض الكل ({{ stats.contact.total }})
+                    </a>
+                {% else %}
+                    <p class="text-muted text-center py-3">
+                        <i class="fa-solid fa-inbox fa-2x d-block mb-2"></i>
+                        لا توجد رسائل بعد
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- ✅ أزرار الإجراءات -->
+    <div class="panel-actions">
+        <a href="{% url 'panel:logout' %}" class="btn-outline">
+            <i class="fa-solid fa-sign-out-alt"></i>
+            تسجيل الخروج
+        </a>
+        {% if is_super_admin %}
+        <a href="/admin/" class="btn-primary">
+            <i class="fa-solid fa-cog"></i>
+            الإدارة الكاملة (Admin)
+        </a>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}

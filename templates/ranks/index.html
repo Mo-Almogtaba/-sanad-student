@@ -1,0 +1,1015 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ترتيب الرغبات - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<!-- ========================================================= -->
+<!-- الأنماط (داخل الملف - لا يحتاج ملف خارجي) -->
+<!-- ========================================================= -->
+<style>
+/* ============ شريط التنبيه الرفيع ============ */
+.ranks-alert-bar {
+    background: linear-gradient(90deg, #fef3c7 0%, #fde68a 100%);
+    border-bottom: 2px solid #f59e0b;
+    padding: 12px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+.ranks-alert-bar .alert-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+    color: #92400e;
+}
+
+.ranks-alert-bar .bi-info-circle-fill {
+    color: #d97706;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.ranks-alert-bar strong {
+    color: #78350f;
+    font-weight: 800;
+}
+
+.ranks-alert-bar .alert-details-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    background: white;
+    color: #92400e;
+    border: 2px solid #f59e0b;
+    border-radius: 20px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.ranks-alert-bar .alert-details-btn:hover {
+    background: #f59e0b;
+    color: white;
+}
+
+/* ============ النافذة المنبثقة ============ */
+.ranks-alert-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.ranks-alert-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
+}
+
+.ranks-alert-box {
+    position: relative;
+    background: white;
+    border-radius: 24px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.4s ease;
+}
+
+.alert-header {
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    color: white;
+    padding: 30px 30px 25px;
+    text-align: center;
+    border-radius: 24px 24px 0 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.alert-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.alert-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(245, 158, 11, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    margin: 0 auto 18px;
+    position: relative;
+    z-index: 1;
+    border: 4px solid rgba(251, 191, 36, 0.6);
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.15);
+    animation: pulseWarning 2s infinite;
+}
+
+@keyframes pulseWarning {
+    0%, 100% {
+        box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.15);
+    }
+    50% {
+        box-shadow: 0 0 0 15px rgba(245, 158, 11, 0.05);
+    }
+}
+
+.alert-header h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 0 8px;
+    position: relative;
+    z-index: 1;
+}
+
+.alert-header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.9rem;
+    position: relative;
+    z-index: 1;
+}
+
+.alert-body {
+    padding: 25px 30px;
+}
+
+.alert-section {
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 14px;
+}
+
+.alert-section-success {
+    background: #f0fdf4;
+    border: 2px solid #86efac;
+}
+
+.alert-section-danger {
+    background: #fef2f2;
+    border: 2px solid #fca5a5;
+}
+
+.alert-section .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 1.05rem;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid;
+}
+
+.alert-section-success .section-title {
+    color: #065f46;
+    border-color: #86efac;
+}
+
+.alert-section-danger .section-title {
+    color: #991b1b;
+    border-color: #fca5a5;
+}
+
+.alert-section-success .section-title i {
+    color: #10b981;
+}
+
+.alert-section-danger .section-title i {
+    color: #ef4444;
+}
+
+.alert-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.alert-section ul li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    color: #1e293b;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.alert-section ul li i {
+    flex-shrink: 0;
+    margin-top: 4px;
+    font-size: 1rem;
+}
+
+.alert-section-success ul li i {
+    color: #10b981;
+}
+
+.alert-section-danger ul li i {
+    color: #ef4444;
+}
+
+.alert-section ul li strong {
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.alert-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px 18px;
+    background: #eff6ff;
+    border-right: 4px solid #1e40af;
+    border-radius: 10px;
+    color: #1e3a8a;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.alert-note i {
+    color: #f59e0b;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.alert-footer {
+    padding: 0 30px 30px;
+}
+
+.alert-btn-confirm {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #1e40af, #1e3a8a);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(30, 64, 175, 0.3);
+}
+
+.alert-btn-confirm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(30, 64, 175, 0.4);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 768px) {
+    .ranks-alert-bar { padding: 10px 15px; }
+    .ranks-alert-bar .alert-content { font-size: 0.8rem; text-align: center; }
+    .alert-header { padding: 25px 20px 20px; }
+    .alert-header h2 { font-size: 1.2rem; }
+    .alert-icon { width: 70px; height: 70px; font-size: 2.3rem; }
+    .alert-body { padding: 20px; }
+    .alert-section { padding: 15px; }
+    .alert-footer { padding: 0 20px 20px; }
+}
+</style>
+
+<!-- ========================================================= -->
+<!-- شريط التنبيه الرفيع (دائم في الأعلى) -->
+<!-- ========================================================= -->
+<div class="ranks-alert-bar">
+    <div class="alert-content">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>
+            النظام للجامعات <strong>الحكومية</strong> فقط • دليل <strong>2024</strong> • للشهادة السودانية <strong>2025-2026</strong>
+        </span>
+        <button type="button" class="alert-details-btn" onclick="showAlertModal()">
+            تفاصيل
+            <i class="bi bi-chevron-left"></i>
+        </button>
+    </div>
+</div>
+
+<link rel="stylesheet" href="{% static 'css/ranks/style.css' %}">
+
+<div class="page-hero">
+    <h1>🎯 نظام ترتيب الرغبات</h1>
+    <p>رتّب رغباتك وتوقّع فرص قبولك في الجامعات السودانية</p>
+</div>
+
+<div class="container py-5 ranks-page">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+
+            <div class="alert alert-info mb-4">
+                <i class="bi bi-info-circle"></i>
+                <strong>ملاحظة:</strong> أدخل نسبتك، اختر رغباتك (حتى 45 رغبة)، وسنتوقع فرص قبولك حسب دليل 2024.
+            </div>
+
+            <!-- الخطوة 1: بيانات الطالب -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <span class="badge bg-light text-dark">1</span>
+                        بيانات الطالب
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-person"></i> الاسم (اختياري)
+                            </label>
+                            <input type="text" class="form-control" id="student_name" 
+                                   placeholder="اسمك (للعرض في النتائج فقط)" maxlength="100">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-percent"></i> نسبتك المئوية *
+                            </label>
+                            <input type="number" class="form-control form-control-lg" 
+                                   id="percentage" step="0.1" min="0" max="100"
+                                   placeholder="مثال: 85.5" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-mortarboard"></i> المساق
+                            </label>
+                            <select class="form-select" id="stream">
+                                <option value="scientific">علمي</option>
+                                <option value="literary">أدبي</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الخطوة 2: اختيار الكليات -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <span class="badge bg-light text-dark">2</span>
+                        اختر رغباتك
+                        <span class="badge bg-warning text-dark float-end" id="selectedCount">0/45</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-4">
+                            <select class="form-select" id="universityFilter">
+                                <option value="">جميع الجامعات</option>
+                                {% for uni in universities %}
+                                    <option value="{{ uni.id }}">{{ uni.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="categoryFilter">
+                                <option value="">جميع التصنيفات</option>
+                                <option value="medical">طبي</option>
+                                <option value="engineering">هندسي</option>
+                                <option value="humanities">أدبي</option>
+                                <option value="administrative">إداري</option>
+                                <option value="science">علوم</option>
+                                <option value="technology">تقنية</option>
+                                <option value="agriculture">زراعي</option>
+                                <option value="law">قانون</option>
+                                <option value="education">تربية</option>
+                                <option value="art">فنون</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="searchBox" 
+                                   placeholder="🔍 ابحث عن كلية أو جامعة...">
+                        </div>
+                    </div>
+                    
+                    <div class="border rounded p-2" style="max-height: 500px; overflow-y: auto; background: #f8f9fa;">
+                        <div id="facultiesList">
+                            <div class="text-center text-muted py-4">
+                                <div class="spinner-border spinner-border-sm" role="status"></div>
+                                جاري تحميل الكليات...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الخطوة 3: الرغبات المختارة -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <span class="badge bg-dark">3</span>
+                        رغباتك (بالترتيب)
+                        <button class="btn btn-sm btn-outline-dark float-end" onclick="clearAll()">
+                            <i class="bi bi-trash"></i> مسح الكل
+                        </button>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="selectedList">
+                        <p class="text-center text-muted py-3">
+                            لم تختر أي رغبة بعد. اختر من القائمة أعلاه.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- زر التوقع -->
+            <div class="d-grid gap-2 mb-5">
+                <button type="button" class="btn btn-primary btn-lg" 
+                        id="predictBtn" onclick="predictNow()" disabled>
+                    <i class="bi bi-magic"></i>
+                    توقّع فرص القبول
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- ========================================================= -->
+<!-- نافذة التنبيه -->
+<!-- ========================================================= -->
+<div class="ranks-alert-modal" id="ranksAlertModal" style="display:none;">
+    <div class="ranks-alert-overlay" onclick="closeAlertModal()"></div>
+    <div class="ranks-alert-box">
+        
+        <div class="alert-header">
+            <div class="alert-icon">⚠️</div>
+            <h2>تنبيه مهم قبل البدء</h2>
+            <p>اقرأ النطاق بعناية لتفهم ما يقدمه النظام</p>
+        </div>
+
+        <div class="alert-body">
+                        <div class="alert-section alert-section-danger">
+                <div class="section-title">
+                    <i class="bi bi-x-circle-fill"></i>
+                    <span>توضيح مهم !</span>
+                </div>
+                <ul>
+                    <li>
+                        <i class="bi bi-x"></i>
+                        <span><strong>هذا النظام ليس له اي علاقة بنظام القبول الالكتروني الخاص بوزارة التربية والتعليم العالي لجمهورية السودان وليس للمنصة اي صلة او علاقة بالوزارة او نظام القبول وانما  النظام لمساعدة الطلاب على ترتيب رغباتهم عبر  التاكد من احتمالية المنافسة حسب الحد الادنى للقبول في دليل العام السابق والذي موجود بالموقع الرسمي للوزارة</strong></span>
+                    </li>
+            </div>
+            <div class="alert-section alert-section-success">
+                <div class="section-title">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>النظام يشمل:</span>
+                </div>
+                <ul>
+                    <li>
+                        <i class="bi bi-building"></i>
+                        <span>الجامعات <strong>الحكومية السودانية</strong> فقط</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-bar-chart"></i>
+                        <span>الحد الأدنى للقبول حسب <strong>دليل 2024</strong></span>
+                    </li>
+                    <li>
+                        <i class="bi bi-mortarboard"></i>
+                        <span>للطلاب الحاصلين على <strong>الشهادة السودانية 2025 - 2026</strong></span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="alert-section alert-section-danger">
+                <div class="section-title">
+                    <i class="bi bi-x-circle-fill"></i>
+                    <span>لا يشمل:</span>
+                </div>
+                <ul>
+                    <li>
+                        <i class="bi bi-x"></i>
+                        <span>الجامعات <strong>الخاصة</strong> (نظم قبول مختلفة)</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-x"></i>
+                        <span><strong>القبول الولائي</strong></span>
+                    </li>
+                    <li>
+                        <i class="bi bi-x"></i>
+                        <span>الشهادات <strong>الأجنبية</strong></span>
+                    </li>
+                    <li>
+                        <i class="bi bi-x"></i>
+                        <span><strong>الدبلومات</strong></span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="alert-note">
+                <i class="bi bi-lightbulb"></i>
+                <span>
+                    <strong>ملاحظة:</strong> النتائج تقديرية وقد تختلف حسب المنافسة الفعلية وعدد المقاعد المتاحة.
+                </span>
+            </div>
+
+        </div>
+
+        <div class="alert-footer">
+            <button type="button" class="alert-btn-confirm" onclick="closeAlertModal()">
+                <i class="bi bi-check-circle-fill"></i>
+                فهمت، ابدأ
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ========================================================= -->
+<!-- نافذة الاشتراك -->
+<!-- ========================================================= -->
+<div class="modal fade" id="subscriptionModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-lock-fill"></i>
+                    انتهت محاولتك المجانية
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    للحصول على كود وصول <strong>(20 محاولة لمدة 30 يوماً)</strong>،
+                    الرجاء إدخال بياناتك وسنتواصل معك عبر واتساب.
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-person"></i> الاسم الكامل *
+                    </label>
+                    <input type="text" id="reqName" class="form-control" 
+                           placeholder="أدخل اسمك الكامل" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-whatsapp"></i> رقم الواتساب *
+                    </label>
+                    <input type="tel" id="reqPhone" class="form-control"
+                           placeholder="+249xxxxxxxxx" required>
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        نفس الرقم الذي ستستخدمه للتفعيل
+                    </small>
+                </div>
+
+                <div id="reqError" class="alert alert-danger d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary w-100" onclick="submitAccessRequest()">
+                    <i class="bi bi-paper-plane"></i>
+                    إرسال الطلب
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========================================================= -->
+<!-- نافذة نجاح الطلب -->
+<!-- ========================================================= -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-check-circle-fill"></i>
+                    تم إرسال طلبك
+                </h5>
+            </div>
+            <div class="modal-body text-center">
+                <i class="bi bi-check-circle-fill display-1 text-success"></i>
+                <h4 class="mt-3">تم استلام طلبك بنجاح!</h4>
+                <p class="text-muted">كود الطلب:</p>
+                <h3 id="successReqCode" class="text-primary"></h3>
+                
+                <hr>
+                
+                <p class="fw-bold">الخطوة التالية:</p>
+                <p class="text-muted">
+                    سيتم فتح واتساب الآن لإرسال الطلب.
+                    بعد استلام كود الوصول، افتح صفحة التفعيل:
+                </p>
+                <a href="/access/activate/" class="btn btn-primary">
+                    <i class="bi bi-key"></i>
+                    صفحة تفعيل الكود
+                </a>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">
+                    حسناً، فهمت
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+// =========================================================
+// المتغيرات العامة
+// =========================================================
+let selectedFaculties = [];
+const MAX_PREFERENCES = 45;
+
+// =========================================================
+// تحميل الكليات
+// =========================================================
+function loadFaculties() {
+    const universityId = document.getElementById('universityFilter').value;
+    const category = document.getElementById('categoryFilter').value;
+    const query = document.getElementById('searchBox').value;
+    
+    const list = document.getElementById('facultiesList');
+    list.innerHTML = `
+        <div class="text-center text-muted py-4">
+            <div class="spinner-border spinner-border-sm"></div>
+            جاري التحميل...
+        </div>
+    `;
+    
+    const params = new URLSearchParams({
+        university: universityId,
+        category: category,
+        q: query,
+    });
+    
+    fetch(`/ranks/api/search-faculties/?${params}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                renderFaculties(data.faculties);
+            } else {
+                list.innerHTML = '<div class="text-center text-danger py-4">خطأ في التحميل</div>';
+            }
+        })
+        .catch(() => {
+            list.innerHTML = '<div class="text-center text-danger py-4">خطأ في الاتصال</div>';
+        });
+}
+
+// =========================================================
+// عرض الكليات
+// =========================================================
+function renderFaculties(faculties) {
+    const list = document.getElementById('facultiesList');
+    
+    if (!faculties || faculties.length === 0) {
+        list.innerHTML = `
+            <div class="text-center text-muted py-4" style="grid-column: 1 / -1;">
+                <i class="bi bi-search display-4 d-block mb-2"></i>
+                لا توجد كليات تطابق البحث
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    faculties.forEach(function(f) {
+        const isSelected = selectedFaculties.some(s => s.id === f.id);
+        const selectedClass = isSelected ? 'selected' : '';
+        const btnClass = isSelected ? 'btn-added' : 'btn-add';
+        const btnSymbol = isSelected ? '✓' : '+';
+        
+        html += `
+            <div class="faculty-item ${selectedClass}">
+                <div class="faculty-item-info">
+                    <h6>${f.name}</h6>
+                    <div class="university">🏛️ ${f.university}</div>
+                    <div class="meta">
+                        <span class="badge bg-primary">الحد الأدنى: ${f.min_percentage ? f.min_percentage + '%' : '—'}</span>
+                    </div>
+                </div>
+                <button class="add-btn ${btnClass}" onclick="toggleFaculty(${f.id}, '${f.name.replace(/'/g, "\\'")}', '${f.university.replace(/'/g, "\\'")}', ${f.min_percentage || 0}, '${f.category}', this)">
+                    ${btnSymbol}
+                </button>
+            </div>
+        `;
+    });
+    
+    list.innerHTML = html;
+}
+
+// =========================================================
+// إضافة/إزالة كلية
+// =========================================================
+function toggleFaculty(id, name, university, minPercentage, category, btnElement) {
+    const index = selectedFaculties.findIndex(f => f.id === id);
+    
+    if (index !== -1) {
+        selectedFaculties.splice(index, 1);
+    } else {
+        if (selectedFaculties.length >= MAX_PREFERENCES) {
+            alert(`⚠️ الحد الأقصى ${MAX_PREFERENCES} رغبة`);
+            return;
+        }
+        selectedFaculties.push({ id, name, university, minPercentage, category });
+    }
+    
+    if (btnElement) {
+        const isSelected = index === -1;
+        const card = btnElement.closest('.faculty-item');
+        
+        if (isSelected) {
+            btnElement.classList.remove('btn-add');
+            btnElement.classList.add('btn-added');
+            btnElement.textContent = '✓';
+            card.classList.add('selected');
+        } else {
+            btnElement.classList.remove('btn-added');
+            btnElement.classList.add('btn-add');
+            btnElement.textContent = '+';
+            card.classList.remove('selected');
+        }
+    }
+    
+    updateSelectedList();
+}
+
+// =========================================================
+// تحديث قائمة الرغبات
+// =========================================================
+function updateSelectedList() {
+    const list = document.getElementById('selectedList');
+    const count = document.getElementById('selectedCount');
+    const btn = document.getElementById('predictBtn');
+    
+    count.textContent = `${selectedFaculties.length}/${MAX_PREFERENCES}`;
+    
+    if (selectedFaculties.length === 0) {
+        list.innerHTML = `<p class="text-center text-muted py-3">لم تختر أي رغبة بعد. اختر من القائمة أعلاه.</p>`;
+        btn.disabled = true;
+        return;
+    }
+    
+    let html = '';
+    selectedFaculties.forEach(function(f, index) {
+        html += `
+            <div class="selected-item">
+                <div class="priority-badge">${index + 1}</div>
+                <div class="info">
+                    <h6>${f.name}</h6>
+                    <small>${f.university}</small>
+                </div>
+                <button class="remove-btn" onclick="removeFromSelection(${f.id})">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        `;
+    });
+    
+    list.innerHTML = html;
+    btn.disabled = false;
+}
+
+// =========================================================
+// إزالة رغبة
+// =========================================================
+function removeFromSelection(id) {
+    const index = selectedFaculties.findIndex(f => f.id === id);
+    if (index !== -1) {
+        selectedFaculties.splice(index, 1);
+        updateSelectedList();
+        loadFaculties();
+    }
+}
+
+// =========================================================
+// مسح الكل
+// =========================================================
+function clearAll() {
+    if (selectedFaculties.length === 0) return;
+    if (!confirm('هل أنت متأكد من مسح جميع الرغبات؟')) return;
+    
+    selectedFaculties = [];
+    updateSelectedList();
+    loadFaculties();
+}
+
+// =========================================================
+// تنفيذ التوقع
+// =========================================================
+function predictNow() {
+    const percentage = parseFloat(document.getElementById('percentage').value);
+    const studentName = document.getElementById('student_name').value;
+    const stream = document.getElementById('stream').value;
+    
+    if (isNaN(percentage) || percentage < 0 || percentage > 100) {
+        alert('⚠️ الرجاء إدخال نسبة مئوية صحيحة (0-100)');
+        document.getElementById('percentage').focus();
+        return;
+    }
+    
+    if (selectedFaculties.length === 0) {
+        alert('⚠️ الرجاء اختيار رغبة واحدة على الأقل');
+        return;
+    }
+    
+    const btn = document.getElementById('predictBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> جاري التوقع...';
+    
+    const formData = new FormData();
+    formData.append('percentage', percentage);
+    formData.append('student_name', studentName);
+    formData.append('stream', stream);
+    selectedFaculties.forEach(f => {
+        formData.append('faculties[]', f.id);
+    });
+    
+    fetch('/ranks/predict/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = data.redirect_url;
+        } else {
+            if (data.show_subscription) {
+                const modal = new bootstrap.Modal(document.getElementById('subscriptionModal'));
+                modal.show();
+            } else if (data.show_activation) {
+                window.location.href = '/access/activate/';
+            } else {
+                alert('❌ ' + data.error);
+            }
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-magic"></i> توقّع فرص القبول';
+        }
+    })
+    .catch(() => {
+        alert('❌ حدث خطأ في الاتصال');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-magic"></i> توقّع فرص القبول';
+    });
+}
+
+// =========================================================
+// إرسال طلب الاشتراك
+// =========================================================
+function submitAccessRequest() {
+    const fullName = document.getElementById('reqName').value.trim();
+    const phone = document.getElementById('reqPhone').value.trim();
+    const errBox = document.getElementById('reqError');
+    
+    if (!fullName || !phone) {
+        errBox.textContent = '⚠️ الرجاء إدخال جميع البيانات';
+        errBox.classList.remove('d-none');
+        return;
+    }
+    
+    errBox.classList.add('d-none');
+    
+    const formData = new FormData();
+    formData.append('full_name', fullName);
+    formData.append('phone_number', phone);
+    
+    fetch('/access/submit/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            bootstrap.Modal.getInstance(document.getElementById('subscriptionModal')).hide();
+            
+            document.getElementById('successReqCode').textContent = data.request_code;
+            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+            successModal.show();
+            
+            setTimeout(() => {
+                window.open(data.wa_link, '_blank');
+            }, 1500);
+        } else {
+            errBox.textContent = '❌ ' + data.error;
+            errBox.classList.remove('d-none');
+        }
+    })
+    .catch(() => {
+        errBox.textContent = '❌ حدث خطأ في الاتصال';
+        errBox.classList.remove('d-none');
+    });
+}
+
+// =========================================================
+// CSRF Token
+// =========================================================
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// =========================================================
+// تنبيه النطاق - يظهر كل مرة
+// =========================================================
+function showAlertModal() {
+    const modal = document.getElementById('ranksAlertModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeAlertModal() {
+    const modal = document.getElementById('ranksAlertModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+}
+
+// =========================================================
+// الأحداث
+// =========================================================
+document.addEventListener('DOMContentLoaded', function() {
+    loadFaculties();
+    
+    document.getElementById('universityFilter').addEventListener('change', loadFaculties);
+    document.getElementById('categoryFilter').addEventListener('change', loadFaculties);
+    
+    let searchTimeout;
+    document.getElementById('searchBox').addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(loadFaculties, 400);
+    });
+
+    // ✅ إظهار التنبيه في كل مرة
+    setTimeout(showAlertModal, 400);
+});
+
+// إغلاق عند Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeAlertModal();
+});
+</script>
+{% endblock %}

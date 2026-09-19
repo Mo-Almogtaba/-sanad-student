@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}رسائل الاتصال - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/panel.css' %}">
+
+<div class="page-hero">
+    <h1>💬 رسائل اتصل بنا</h1>
+    <p>إجمالي: {{ total }} رسالة</p>
+</div>
+
+<div class="container py-5">
+
+    <div class="panel-toolbar">
+        <a href="{% url 'panel:dashboard' %}" class="btn-outline btn-sm">
+            <i class="fa-solid fa-arrow-right"></i> العودة
+        </a>
+    </div>
+
+    <!-- الفلاتر -->
+    <div class="filter-card">
+        <form method="get">
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label>🔍 بحث</label>
+                    <input type="text" name="q" value="{{ search }}" 
+                           placeholder="الاسم، الرقم...">
+                </div>
+
+                <div class="filter-item">
+                    <label>الحالة</label>
+                    <select name="status">
+                        <option value="">جميع الحالات</option>
+                        <option value="new" {% if status_filter == 'new' %}selected{% endif %}>جديد</option>
+                        <option value="read" {% if status_filter == 'read' %}selected{% endif %}>تم القراءة</option>
+                        <option value="replied" {% if status_filter == 'replied' %}selected{% endif %}>تم الرد</option>
+                        <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>مؤرشف</option>
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <label>النطاق</label>
+                    <select name="scope">
+                        <option value="">الكل</option>
+                        <option value="inquiry" {% if scope_filter == 'inquiry' %}selected{% endif %}>استفسار</option>
+                        <option value="complaint" {% if scope_filter == 'complaint' %}selected{% endif %}>شكوى</option>
+                        <option value="suggestion" {% if scope_filter == 'suggestion' %}selected{% endif %}>اقتراح</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-primary btn-sm">
+                        <i class="fa-solid fa-search"></i> تطبيق
+                    </button>
+                    <a href="{% url 'panel:contact' %}" class="btn-outline btn-sm">
+                        <i class="fa-solid fa-eraser"></i> مسح
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- الجدول -->
+    <div class="info-card">
+        {% if messages_list %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>الرقم</th>
+                        <th>الاسم</th>
+                        <th>الخدمة</th>
+                        <th>النطاق</th>
+                        <th>الحالة</th>
+                        <th>التاريخ</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for msg in messages_list %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <a href="{% url 'panel:contact_detail' msg.pk %}" class="code-link">
+                                {{ msg.message_code }}
+                            </a>
+                        </td>
+                        <td>
+                            <strong>{{ msg.full_name }}</strong>
+                            <br>
+                            <small class="text-muted">{{ msg.phone_number }}</small>
+                        </td>
+                        <td>
+                            <small>{{ msg.service_display }}</small>
+                        </td>
+                        <td>
+                            {% if msg.scope == 'complaint' %}
+                                <span class="status-badge status-rejected">شكوى</span>
+                            {% elif msg.scope == 'suggestion' %}
+                                <span class="status-badge status-accepted">اقتراح</span>
+                            {% else %}
+                                <span class="status-badge status-reviewed">استفسار</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ msg.status }}">
+                                {{ msg.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <small>{{ msg.submitted_at|date:"Y-m-d" }}</small>
+                            <br>
+                            <small class="text-muted">{{ msg.submitted_at|timesince }} مضت</small>
+                        </td>
+                        <td>
+                            <a href="{% url 'panel:contact_detail' msg.pk %}" 
+                               class="action-btn btn-view" title="عرض">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-inbox"></i>
+            <h3>لا توجد رسائل</h3>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}

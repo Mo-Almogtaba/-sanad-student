@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إدارة دليل التقديم - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/panel.css' %}">
+
+<div class="page-hero">
+    <h1>📖 إدارة دليل التقديم</h1>
+    <p>إجمالي: {{ total }} قسم</p>
+</div>
+
+<div class="container py-5">
+
+    <div class="panel-toolbar">
+        <a href="{% url 'panel:dashboard' %}" class="btn-outline btn-sm">
+            <i class="fa-solid fa-arrow-right"></i> العودة
+        </a>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="{% url 'panel:guide_dates' %}" class="btn-outline btn-sm">
+                <i class="fa-solid fa-calendar-check"></i> المواعيد
+            </a>
+            <a href="{% url 'panel:guide_videos' %}" class="btn-outline btn-sm">
+                <i class="fa-solid fa-video"></i> الفيديوهات
+            </a>
+            <button class="btn-primary btn-sm" onclick="openAddModal()">
+                <i class="fa-solid fa-plus"></i> قسم جديد
+            </button>
+        </div>
+    </div>
+
+    <!-- معلومات -->
+    <div class="info-card mb-4" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 2px solid #93c5fd;">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <i class="fa-solid fa-info-circle" style="color:#1e40af; font-size:1.5rem;"></i>
+            <div>
+                <strong style="color:#1e3a8a;">تلميح:</strong>
+                <span style="color:#475569;"> الأقسام تظهر بهذا الترتيب في صفحة الدليل. يمكنك سحب وإعادة ترتيب الأقسام.</span>
+            </div>
+            <a href="/guide/" target="_blank" class="btn-outline btn-sm" style="margin-right:auto;">
+                <i class="fa-solid fa-external-link-alt"></i> معاينة
+            </a>
+        </div>
+    </div>
+
+    <!-- الفلاتر -->
+    <div class="filter-card">
+        <form method="get">
+            <div class="filter-row" style="grid-template-columns: 2fr 1fr auto;">
+                <div class="filter-item">
+                    <label>🔍 بحث</label>
+                    <input type="text" name="q" value="{{ search }}" 
+                           placeholder="عنوان القسم، الوصف...">
+                </div>
+
+                <div class="filter-item">
+                    <label>الحالة</label>
+                    <select name="status">
+                        <option value="">الكل</option>
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>مفعّل</option>
+                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>معطّل</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-primary btn-sm">
+                        <i class="fa-solid fa-search"></i> تطبيق
+                    </button>
+                    <a href="{% url 'panel:guide_sections' %}" class="btn-outline btn-sm">
+                        <i class="fa-solid fa-eraser"></i> مسح
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- القائمة -->
+    <div class="info-card">
+        {% if sections %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>الأيقونة</th>
+                        <th>العنوان</th>
+                        <th>عدد الكروت</th>
+                        <th>الترتيب</th>
+                        <th>الحالة</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for section in sections %}
+                    <tr id="row-{{ section.pk }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <div style="width:42px; height:42px; border-radius:10px; background:{{ section.color }}; color:white; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                                <i class="fa-solid {{ section.icon }}"></i>
+                            </div>
+                        </td>
+                        <td>
+                            <strong>{{ section.title }}</strong>
+                            {% if section.description %}
+                                <br>
+                                <small class="text-muted">{{ section.description|truncatechars:60 }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge status-reviewed">
+                                {{ section.cards.count }} كرت
+                            </span>
+                        </td>
+                        <td>{{ section.order }}</td>
+                        <td>
+                            <span class="status-badge {% if section.is_active %}status-accepted{% else %}status-rejected{% endif %}">
+                                {% if section.is_active %}✅ مفعّل{% else %}⏸️ معطّل{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'panel:guide_section_detail' section.pk %}" 
+                               class="action-btn btn-view" title="إدارة الكروت">
+                                <i class="fa-solid fa-list"></i>
+                            </a>
+                            <a href="{% url 'panel:guide_section_detail' section.pk %}" 
+                               class="action-btn" title="تعديل"
+                               style="background:#dbeafe; color:#1e40af;">
+                                <i class="fa-solid fa-edit"></i>
+                            </a>
+                            <button class="action-btn" 
+                                    onclick="toggleSection({{ section.pk }})" 
+                                    title="{% if section.is_active %}تعطيل{% else %}تفعيل{% endif %}"
+                                    style="background:#fef3c7; color:#92400e;">
+                                <i class="fa-solid fa-{% if section.is_active %}eye-slash{% else %}eye{% endif %}"></i>
+                            </button>
+                            <button class="action-btn" 
+                                    onclick="deleteSection({{ section.pk }}, '{{ section.title|escapejs }}')" 
+                                    title="حذف"
+                                    style="background:#fee2e2; color:#991b1b;">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-book-open"></i>
+            <h3>لا توجد أقسام</h3>
+            <p>ابدأ بإضافة قسم جديد للدليل</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Modal: إضافة قسم -->
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">➕ إضافة قسم جديد</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addForm">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">عنوان القسم *</label>
+                        <input type="text" name="title" class="form-control" required 
+                               placeholder="مثال: المتطلبات الأساسية">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الوصف</label>
+                        <textarea name="description" class="form-control" rows="2" 
+                                  placeholder="وصف مختصر يظهر تحت العنوان"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">الأيقونة (Font Awesome)</label>
+                            <input type="text" name="icon" class="form-control" 
+                                   value="fa-info-circle" 
+                                   placeholder="fa-list-check">
+                            <small class="text-muted">مثال: fa-book, fa-list, fa-check</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">اللون</label>
+                            <input type="color" name="color" class="form-control" 
+                                   value="#1e40af" style="height:45px;">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">الترتيب</label>
+                            <input type="number" name="order" class="form-control" value="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">&nbsp;</label>
+                            <div class="form-check" style="padding-top:10px;">
+                                <input type="checkbox" name="is_active" class="form-check-input" 
+                                       id="add_is_active" checked>
+                                <label class="form-check-label" for="add_is_active">
+                                    مفعّل
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary w-100" onclick="createSection()">
+                    <i class="fa-solid fa-save"></i> حفظ القسم
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function getCookie(name) {
+    let v = null;
+    if (document.cookie) {
+        const cs = document.cookie.split(';');
+        for (let i = 0; i < cs.length; i++) {
+            const c = cs[i].trim();
+            if (c.substring(0, name.length + 1) === (name + '=')) {
+                v = decodeURIComponent(c.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return v;
+}
+
+function openAddModal() {
+    document.getElementById('addForm').reset();
+    new bootstrap.Modal(document.getElementById('addModal')).show();
+}
+
+function createSection() {
+    const form = document.getElementById('addForm');
+    const formData = new FormData(form);
+
+    fetch('{% url "panel:guide_section_create" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ تم إضافة القسم');
+            location.reload();
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+
+function toggleSection(pk) {
+    fetch(`/panel/guide/sections/${pk}/toggle/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) location.reload();
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+
+function deleteSection(pk, title) {
+    if (!confirm(`هل أنت متأكد من حذف القسم "${title}"؟\n\nسيتم حذف كل الكروت بداخله!`)) return;
+
+    fetch(`/panel/guide/sections/${pk}/delete/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`row-${pk}`).remove();
+            alert('✅ تم الحذف');
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+</script>
+
+{% endblock %}

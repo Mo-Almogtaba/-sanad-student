@@ -1,0 +1,973 @@
+/* =========================================================
+ *   دليل التقديم - الأنماط الشاملة
+ *   ========================================================= */
+
+/* ============ شريط تقدم القراءة ============ */
+.reading-progress {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    width: 0%;
+    z-index: 9999;
+    transition: width 0.1s ease;
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+
+/* ============ Hero ============ */
+.guide-hero {
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    color: white;
+    padding: 80px 24px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.guide-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.guide-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    right: -5%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(251,191,36,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.guide-hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.guide-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    padding: 10px 22px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.guide-hero h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+    line-height: 1.3;
+}
+
+.guide-hero p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 25px;
+    opacity: 0.95;
+}
+
+.guide-meta {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.guide-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.guide-hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-print,
+.btn-share {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(10px);
+}
+
+.btn-print:hover,
+.btn-share:hover {
+    background: white;
+    color: #1e40af;
+    transform: translateY(-2px);
+}
+
+/* ============ شريط البحث ============ */
+.guide-search-bar {
+    position: sticky;
+    top: 70px;
+    z-index: 100;
+    background: white;
+    padding: 15px 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.guide-search-container {
+    max-width: 700px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.guide-search-container > i.fa-search {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+.guide-search-container input {
+    width: 100%;
+    padding: 14px 50px 14px 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 1rem;
+    background: #f8fafc;
+    transition: all 0.3s;
+}
+
+.guide-search-container input:focus {
+    outline: none;
+    border-color: #1e40af;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+}
+
+.search-clear {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #e5e7eb;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+}
+
+.search-clear:hover {
+    background: #cbd5e1;
+}
+
+.search-results {
+    max-width: 700px;
+    margin: 15px auto 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    display: none;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.search-result-item {
+    display: block;
+    padding: 12px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    text-decoration: none;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.search-result-item:hover {
+    background: #f8fafc;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item strong {
+    display: block;
+    margin-bottom: 3px;
+}
+
+.search-result-item small {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+/* ============ قسم عام ============ */
+.guide-section {
+    margin-bottom: 50px;
+    scroll-margin-top: 150px;
+}
+
+.section-header-guide {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid var(--section-color, #1e40af);
+}
+
+.section-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.section-header-guide h2 {
+    margin: 0 0 5px 0;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.section-header-guide p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+/* ============ الكروت ============ */
+.section-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.guide-card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: all 0.3s;
+    border: 1px solid #f1f5f9;
+}
+
+.guide-card:hover {
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+
+/* Accordion Card */
+.accordion-card .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 20px 24px;
+    background: white;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: right;
+    transition: background 0.2s;
+    gap: 15px;
+}
+
+.accordion-card .card-header:hover {
+    background: #f8fafc;
+}
+
+.accordion-card.open .card-header {
+    background: linear-gradient(90deg, #eff6ff 0%, #ffffff 100%);
+}
+
+.card-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+    text-align: right;
+}
+
+.card-title > i {
+    color: #1e40af;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.card-title strong {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 3px;
+}
+
+.card-title small {
+    display: block;
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.card-arrow {
+    color: #94a3b8;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+}
+
+.accordion-card.open .card-arrow {
+    transform: rotate(180deg);
+    color: #1e40af;
+}
+
+.card-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+}
+
+.accordion-card.open .card-body {
+    max-height: 10000px;
+    padding: 0 24px 24px;
+    border-top: 1px solid #f1f5f9;
+    margin-top: 0;
+    padding-top: 20px;
+}
+
+/* List & Text & Links Cards */
+.list-card,
+.text-card,
+.links-card {
+    padding: 24px;
+}
+
+.list-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.list-header i {
+    color: #1e40af;
+    font-size: 1.3rem;
+}
+
+.list-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.list-subtitle {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+/* ============ المحتوى داخل الكروت ============ */
+.card-content {
+    color: #475569;
+    line-height: 1.8;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+}
+
+.card-content p {
+    margin-bottom: 12px;
+}
+
+.card-content ul,
+.card-content ol {
+    padding-right: 25px;
+    margin-bottom: 15px;
+}
+
+.card-content li {
+    margin-bottom: 8px;
+}
+
+.card-content strong {
+    color: #1e293b;
+}
+
+.card-content h4 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 20px 0 12px;
+}
+
+/* ============ قائمة العناصر ============ */
+.card-list {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+}
+
+.card-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px dashed #f1f5f9;
+    font-size: 0.95rem;
+    color: #475569;
+}
+
+.card-list li:last-child {
+    border-bottom: none;
+}
+
+.card-list li i {
+    margin-top: 3px;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+}
+
+/* ============ الصور ============ */
+.card-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.card-image {
+    margin: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.card-image img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+}
+
+.card-image figcaption {
+    padding: 10px 15px;
+    background: #f8fafc;
+    font-size: 0.85rem;
+    color: #64748b;
+    text-align: center;
+}
+
+/* ============ الروابط ============ */
+.card-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.card-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    background: #f8fafc;
+    border: 2px solid #f1f5f9;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #1e293b;
+    transition: all 0.2s;
+}
+
+.card-link:hover {
+    background: white;
+    border-color: #1e40af;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(30, 64, 175, 0.15);
+    color: #1e40af;
+}
+
+.card-link > i:first-child {
+    font-size: 1.3rem;
+    color: #1e40af;
+    flex-shrink: 0;
+}
+
+.card-link > i:last-child {
+    margin-right: auto;
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+.card-link > div {
+    flex: 1;
+}
+
+.card-link strong {
+    display: block;
+    margin-bottom: 3px;
+}
+
+.card-link small {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+/* ============ الفيديو ============ */
+.card-videos,
+.videos-grid {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.card-video,
+.video-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #f1f5f9;
+}
+
+.card-video h4 {
+    padding: 15px 20px 10px;
+    margin: 0;
+    font-size: 1rem;
+    color: #1e293b;
+}
+
+.video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 */
+    height: 0;
+    overflow: hidden;
+    background: #000;
+}
+
+.video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.card-video p,
+.video-info {
+    padding: 12px 20px;
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.video-info h4 {
+    color: #1e293b;
+    font-size: 1rem;
+    margin-bottom: 8px;
+}
+
+/* ============ المواعيد المهمة ============ */
+.important-dates-section {
+    margin-bottom: 50px;
+    padding: 30px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+    border-radius: 20px;
+    border: 2px solid #fbbf24;
+}
+
+.important-dates-section .section-header-guide {
+    border-bottom-color: #f59e0b;
+}
+
+.important-dates-section .section-header-guide h2 {
+    color: #92400e;
+}
+
+.dates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+.date-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 18px 20px;
+    background: white;
+    border-radius: 14px;
+    border-right: 5px solid var(--card-color, #dc2626);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    position: relative;
+}
+
+.date-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: var(--card-color, #dc2626);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.date-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.date-content h3 {
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.date-content p {
+    margin: 0 0 8px 0;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.date-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: #1e40af;
+    background: #eff6ff;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 700;
+}
+
+.countdown-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+    border-radius: 12px;
+    flex-shrink: 0;
+    min-width: 70px;
+}
+
+.countdown-badge.countdown-today {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+}
+
+.countdown-badge.countdown-past {
+    background: #94a3b8;
+    font-size: 0.8rem;
+    padding: 8px 12px;
+}
+
+.countdown-number {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.countdown-label {
+    font-size: 0.7rem;
+    opacity: 0.9;
+    margin-top: 3px;
+}
+
+/* ============ صندوق النصائح ============ */
+.quick-tips-box {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 50px;
+    border: 2px solid #93c5fd;
+}
+
+.quick-tips-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.quick-tips-header i {
+    color: #fbbf24;
+    font-size: 1.8rem;
+}
+
+.quick-tips-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #1e3a8a;
+}
+
+.quick-tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.quick-tip {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    background: white;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(30, 64, 175, 0.08);
+}
+
+.tip-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+}
+
+.quick-tip strong {
+    display: block;
+    color: #1e293b;
+    margin-bottom: 5px;
+    font-size: 0.95rem;
+}
+
+.quick-tip p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+/* ============ الحالة الفارغة ============ */
+.empty-guide {
+    text-align: center;
+    padding: 80px 20px;
+    color: #94a3b8;
+}
+
+.empty-guide h3 {
+    color: #475569;
+    margin: 20px 0 10px;
+}
+
+/* ============ زر العودة للأعلى ============ */
+.back-to-top {
+    position: fixed;
+    bottom: 90px;
+    left: 25px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #1e40af;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 20px rgba(30, 64, 175, 0.3);
+    transition: all 0.3s;
+    z-index: 999;
+}
+
+.back-to-top.show {
+    display: flex;
+}
+
+.back-to-top:hover {
+    background: #1e3a8a;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(30, 64, 175, 0.4);
+}
+
+/* ============ واتساب عائم ============ */
+.floating-whatsapp {
+    position: fixed;
+    bottom: 25px;
+    left: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #25d366, #128c7e);
+    color: white;
+    padding: 14px 22px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    box-shadow: 0 6px 25px rgba(37, 211, 102, 0.4);
+    z-index: 998;
+    transition: all 0.3s;
+    animation: pulse-wa 2s infinite;
+}
+
+.floating-whatsapp:hover {
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(37, 211, 102, 0.5);
+}
+
+.floating-whatsapp i {
+    font-size: 1.4rem;
+}
+
+@keyframes pulse-wa {
+    0%, 100% { box-shadow: 0 6px 25px rgba(37, 211, 102, 0.4); }
+    50%      { box-shadow: 0 6px 35px rgba(37, 211, 102, 0.7); }
+}
+
+/* ============ Responsive ============ */
+@media (max-width: 768px) {
+    .guide-hero {
+        padding: 50px 16px 40px;
+    }
+
+    .guide-hero h1 {
+        font-size: 1.6rem;
+    }
+
+    .guide-hero p {
+        font-size: 0.95rem;
+    }
+
+    .guide-search-bar {
+        top: 60px;
+        padding: 10px 16px;
+    }
+
+    .section-header-guide {
+        gap: 12px;
+    }
+
+    .section-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 1.2rem;
+    }
+
+    .section-header-guide h2 {
+        font-size: 1.2rem;
+    }
+
+    .date-card {
+        padding: 14px;
+    }
+
+    .floating-whatsapp span {
+        display: none;
+    }
+
+    .floating-whatsapp {
+        width: 55px;
+        height: 55px;
+        padding: 0;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .back-to-top {
+        bottom: 95px;
+        left: 25px;
+        width: 45px;
+        height: 45px;
+    }
+}
+
+/* ============ الطباعة ============ */
+@media print {
+    .guide-search-bar,
+    .back-to-top,
+    .floating-whatsapp,
+    .reading-progress,
+    .guide-hero-actions,
+    .guide-hero-badge,
+    header,
+    footer,
+    nav {
+        display: none !important;
+    }
+
+    .guide-hero {
+        background: white !important;
+        color: black !important;
+        padding: 20px 0;
+    }
+
+    .guide-hero h1 {
+        color: black !important;
+    }
+
+    .accordion-card .card-body {
+        max-height: none !important;
+        padding: 20px 0 !important;
+    }
+
+    .accordion-card .card-arrow {
+        display: none !important;
+    }
+
+    .guide-card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        page-break-inside: avoid;
+        margin-bottom: 15px;
+    }
+
+    .section-header-guide {
+        page-break-after: avoid;
+    }
+}

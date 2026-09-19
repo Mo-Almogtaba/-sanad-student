@@ -1,0 +1,936 @@
+/* =========================================================
+   نظام ترتيب الرغبات - تنسيقات مخصصة
+   ========================================================= */
+
+/* =========================================================
+   شريط العنوان
+   ========================================================= */
+.page-hero {
+    background: linear-gradient(135deg, #1e4fa1, #163a78);
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.page-hero h1 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.page-hero p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1rem;
+}
+
+/* =========================================================
+   بطاقات المعلومات
+   ========================================================= */
+.ranks-page .card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    overflow: hidden;
+    background: white;
+}
+
+.ranks-page .card-header {
+    padding: 15px 20px;
+    font-weight: 600;
+}
+
+.ranks-page .card-body {
+    padding: 20px;
+}
+
+/* =========================================================
+   بطاقة معلومات الطالب - عرض أفقي
+   ========================================================= */
+.student-info-card {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #e5e7eb;
+    margin-bottom: 20px;
+}
+
+.student-info-card .info-item {
+    padding: 20px 15px;
+    text-align: center;
+    border-left: 1px solid #e5e7eb;
+    position: relative;
+}
+
+.student-info-card .info-item:last-child {
+    border-left: none;
+}
+
+.student-info-card .info-item .label {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.student-info-card .info-item .value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.3;
+}
+
+.student-info-card .info-item .value.primary {
+    color: #1e4fa1;
+}
+
+/* =========================================================
+   الحقول والأزرار
+   ========================================================= */
+.ranks-page .form-label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    color: #1f2937;
+}
+
+.ranks-page .form-control,
+.ranks-page .form-select {
+    padding: 12px 15px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    background: #f9fafb;
+    transition: all 0.2s;
+    width: 100%;
+    display: block;
+}
+
+.ranks-page .form-control:focus,
+.ranks-page .form-select:focus {
+    outline: none;
+    border-color: #1e4fa1;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(30, 79, 161, 0.1);
+}
+
+/* =========================================================
+   الكليات - القائمة
+   ========================================================= */
+.ranks-page #facultiesList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+    padding: 5px;
+}
+
+.faculty-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    background: white;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    transition: all 0.2s;
+    height: 100%;
+    min-height: 110px;
+}
+
+.faculty-item:hover {
+    border-color: #1e4fa1;
+    box-shadow: 0 4px 12px rgba(30, 79, 161, 0.1);
+}
+
+.faculty-item.selected {
+    border-color: #28a745;
+    background: #f0fdf4;
+}
+
+.faculty-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.faculty-item-info h6 {
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.4;
+}
+
+.faculty-item-info .university {
+    color: #6b7280;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.faculty-item-info .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.faculty-item-info .meta .badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.faculty-item .add-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    line-height: 1;
+    padding: 0;
+}
+
+.faculty-item .add-btn.btn-add {
+    background: white;
+    color: #1e4fa1;
+    border-color: #1e4fa1;
+}
+
+.faculty-item .add-btn.btn-add:hover {
+    background: #1e4fa1;
+    color: white;
+    transform: scale(1.1);
+}
+
+.faculty-item .add-btn.btn-added {
+    background: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+.faculty-item .add-btn.btn-added:hover {
+    background: #1e7e34;
+    transform: scale(1.1);
+}
+/* =========================================================
+   قائمة الرغبات المختارة
+   ========================================================= */
+.selected-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+}
+
+.selected-item:hover {
+    border-color: #dc3545;
+    background: #fef2f2;
+}
+
+.selected-item .priority-badge {
+    min-width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e4fa1, #163a78);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.selected-item .info {
+    flex: 1;
+    min-width: 0;
+}
+
+.selected-item .info h6 {
+    margin: 0 0 3px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.selected-item .info small {
+    color: #6b7280;
+    font-size: 0.8rem;
+}
+
+.selected-item .remove-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: #fee;
+    color: #dc3545;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.selected-item .remove-btn:hover {
+    background: #dc3545;
+    color: white;
+}
+
+/* =========================================================
+   إحصائيات النتائج - عرض أفقي
+   ========================================================= */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    padding: 25px 15px;
+    border-radius: 14px;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-card .number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.stat-card .label {
+    font-size: 0.9rem;
+    opacity: 0.95;
+    font-weight: 600;
+}
+
+.stat-card.bg-high {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.stat-card.bg-good {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    color: #1f2937;
+}
+
+.stat-card.bg-low {
+    background: linear-gradient(135deg, #fd7e14, #dc6502);
+}
+
+.stat-card.bg-zero {
+    background: linear-gradient(135deg, #6c757d, #495057);
+}
+
+/* =========================================================
+   بطاقة النتيجة
+   ========================================================= */
+.result-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 14px;
+    border-right: 6px solid #6c757d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+}
+
+.result-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.result-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.result-row .priority-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e4fa1, #163a78);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.result-row .faculty-info {
+    flex: 1;
+    min-width: 200px;
+}
+
+.result-row .faculty-info h5 {
+    margin: 0 0 4px 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.result-row .faculty-info .university {
+    color: #6b7280;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+
+.result-row .faculty-info .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.result-row .faculty-info .badges .badge {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    font-weight: 500;
+}
+
+.result-row .numbers {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.result-row .numbers .num-item {
+    text-align: center;
+    min-width: 70px;
+}
+
+.result-row .numbers .num-item .label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 3px;
+}
+
+.result-row .numbers .num-item .value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.result-row .numbers .num-item .value.diff-positive {
+    color: #28a745;
+}
+
+.result-row .numbers .num-item .value.diff-negative {
+    color: #dc3545;
+}
+
+.result-row .numbers .num-item .value.diff-zero {
+    color: #ffc107;
+}
+
+.result-row .chance-box {
+    padding: 10px 20px;
+    border-radius: 12px;
+    text-align: center;
+    color: white;
+    min-width: 130px;
+    flex-shrink: 0;
+}
+
+.result-row .chance-box i {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.result-row .chance-box .name {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+/* =========================================================
+   أزرار الترتيب
+   ========================================================= */
+.sort-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 12px 15px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.sort-toolbar .btn-group .btn {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* =========================================================
+   ترويسة الطباعة (تظهر فقط عند الطباعة)
+   ========================================================= */
+.print-header {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    border-bottom: 3px double #1e4fa1;
+    margin-bottom: 20px;
+}
+
+.print-header h1 {
+    color: #1e4fa1;
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+    font-weight: 800;
+}
+
+.print-header .subtitle {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.print-header .print-info {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+    text-align: right;
+    font-size: 0.9rem;
+}
+
+.print-header .print-info .item {
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.print-header .print-info .item .label {
+    color: #6b7280;
+    font-size: 0.75rem;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.print-header .print-info .item .value {
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.print-footer {
+    display: none;
+    text-align: center;
+    padding: 15px;
+    margin-top: 20px;
+    border-top: 2px solid #e5e7eb;
+    color: #6b7280;
+    font-size: 0.8rem;
+}
+
+/* =========================================================
+   تجاوب
+   ========================================================= */
+@media (max-width: 768px) {
+    .ranks-page #facultiesList {
+        grid-template-columns: 1fr;
+    }
+    
+    .student-info-card {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .student-info-card .info-item:nth-child(2) {
+        border-left: none;
+    }
+    
+    .student-info-card .info-item:nth-child(1),
+    .student-info-card .info-item:nth-child(2) {
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .stat-card .number {
+        font-size: 2rem;
+    }
+    
+    .result-row {
+        gap: 10px;
+    }
+    
+    .result-row .priority-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 0.95rem;
+    }
+    
+    .result-row .chance-box {
+        width: 100%;
+        min-width: unset;
+    }
+    
+    .result-row .numbers {
+        width: 100%;
+        justify-content: space-around;
+    }
+    
+    .page-hero h1 {
+        font-size: 1.3rem;
+    }
+}
+
+/* =========================================================
+   تنسيق الطباعة
+   ========================================================= */
+@media print {
+    /* إخفاء عناصر غير ضرورية */
+    .navbar,
+    .footer,
+    .page-hero,
+    .sort-toolbar,
+    .alert,
+    .btn,
+    .no-print,
+    footer {
+        display: none !important;
+    }
+    
+    /* إظهار ترويسة الطباعة */
+    .print-header {
+        display: block !important;
+    }
+    
+    .print-footer {
+        display: block !important;
+    }
+    
+    /* ضبط الصفحة */
+    @page {
+        size: A4;
+        margin: 1.5cm 1cm;
+    }
+    
+    body {
+        background: white !important;
+        font-size: 11pt;
+        color: #000;
+    }
+    
+    .ranks-page {
+        padding: 0 !important;
+    }
+    
+    .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+    
+    /* بطاقة معلومات الطالب */
+    .student-info-card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        page-break-inside: avoid;
+    }
+    
+    /* الإحصائيات */
+    .stats-grid {
+        page-break-inside: avoid;
+        margin-bottom: 15px;
+    }
+    
+    .stat-card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        padding: 15px 10px;
+    }
+    
+    .stat-card .number {
+        font-size: 1.8rem;
+    }
+    
+    /* بطاقات النتائج */
+    .result-card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        page-break-inside: avoid;
+        margin-bottom: 10px;
+        padding: 12px 15px;
+    }
+    
+    .result-card:hover {
+        transform: none;
+    }
+    
+    .result-row .priority-circle {
+        width: 35px;
+        height: 35px;
+        font-size: 0.85rem;
+        background: #1e4fa1 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .result-row .faculty-info h5 {
+        font-size: 0.95rem;
+    }
+    
+    .result-row .numbers .num-item .value {
+        font-size: 0.95rem;
+    }
+    
+    .result-row .chance-box {
+        min-width: 100px;
+        padding: 8px 15px;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .result-row .chance-box i {
+        font-size: 1.2rem;
+    }
+    
+    .result-row .chance-box .name {
+        font-size: 0.8rem;
+    }
+    
+    /* الألوان */
+    * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+/* =========================================================
+   جدول الطباعة المختصر
+   ========================================================= */
+.print-table-container {
+    display: none;  /* مخفي على الشاشة */
+}
+
+.print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 0.85rem;
+}
+
+.print-table th {
+    background: #1e4fa1;
+    color: white;
+    padding: 8px 5px;
+    text-align: center;
+    font-weight: 700;
+    border: 1px solid #ccc;
+    font-size: 0.8rem;
+}
+
+.print-table td {
+    padding: 6px 5px;
+    text-align: center;
+    border: 1px solid #ddd;
+    font-size: 0.8rem;
+}
+
+.print-table tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.print-table .diff-positive {
+    color: #28a745;
+    font-weight: 700;
+}
+
+.print-table .diff-negative {
+    color: #dc3545;
+    font-weight: 700;
+}
+
+.print-table .diff-zero {
+    color: #ffc107;
+    font-weight: 700;
+}
+
+/* =========================================================
+   تنسيق الطباعة
+   ========================================================= */
+@media print {
+    /* إخفاء عناصر غير ضرورية */
+    .navbar,
+    .footer,
+    .page-hero,
+    .sort-toolbar,
+    .alert,
+    .btn,
+    .no-print,
+    footer,
+    .screen-results {
+        display: none !important;
+    }
+    
+    /* إظهار ترويسة الطباعة */
+    .print-header {
+        display: block !important;
+    }
+    
+    /* إظهار جدول الطباعة */
+    .print-table-container {
+        display: block !important;
+    }
+    
+    /* إخفاء بطاقات الشاشة */
+    #resultsList {
+        display: none !important;
+    }
+    
+    .print-footer {
+        display: block !important;
+    }
+    
+    /* ضبط الصفحة */
+    @page {
+        size: A4;
+        margin: 1cm;
+    }
+    
+    body {
+        background: white !important;
+        font-size: 10pt;
+        color: #000;
+    }
+    
+    .ranks-page {
+        padding: 0 !important;
+    }
+    
+    .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+    
+    /* بطاقة معلومات الطالب */
+    .student-info-card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        page-break-inside: avoid;
+        margin-bottom: 10px;
+    }
+    
+    .student-info-card .info-item {
+        padding: 10px 8px;
+    }
+    
+    .student-info-card .info-item .value {
+        font-size: 1rem;
+    }
+    
+    /* الإحصائيات */
+    .stats-grid {
+        page-break-inside: avoid;
+        margin-bottom: 10px;
+        gap: 8px;
+    }
+    
+    .stat-card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        padding: 10px 5px;
+    }
+    
+    .stat-card .number {
+        font-size: 1.5rem;
+    }
+    
+    .stat-card .label {
+        font-size: 0.75rem;
+    }
+    
+    /* الترويسة */
+    .print-header {
+        padding: 10px 0;
+        margin-bottom: 10px;
+    }
+    
+    .print-header h1 {
+        font-size: 1.3rem;
+    }
+    
+    .print-header .subtitle {
+        font-size: 0.85rem;
+    }
+    
+    .print-header .print-info {
+        margin-top: 8px;
+        gap: 6px;
+    }
+    
+    .print-header .print-info .item {
+        padding: 6px;
+    }
+    
+    /* الجدول */
+    .print-table {
+        font-size: 0.75rem;
+        page-break-inside: auto;
+    }
+    
+    .print-table th,
+    .print-table td {
+        padding: 4px 3px;
+        font-size: 0.7rem;
+    }
+    
+    .print-table tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+    
+    /* التذييل */
+    .print-footer {
+        padding: 8px 0;
+        font-size: 0.7rem;
+        margin-top: 10px;
+    }
+    
+    /* الألوان */
+    * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}

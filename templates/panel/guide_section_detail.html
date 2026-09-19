@@ -1,0 +1,449 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ section.title }} - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/panel.css' %}">
+
+<div class="page-hero" style="background: linear-gradient(135deg, {{ section.color }} 0%, {{ section.color }}dd 100%);">
+    <h1>
+        <i class="fa-solid {{ section.icon }}"></i>
+        {{ section.title }}
+    </h1>
+    <p>{{ section.cards.count }} كرت في هذا القسم</p>
+</div>
+
+<div class="container py-5">
+
+    <div class="panel-toolbar">
+        <a href="{% url 'panel:guide_sections' %}" class="btn-outline btn-sm">
+            <i class="fa-solid fa-arrow-right"></i> العودة للأقسام
+        </a>
+        <button class="btn-primary btn-sm" onclick="openAddCardModal()">
+            <i class="fa-solid fa-plus"></i> كرت جديد
+        </button>
+    </div>
+
+    <!-- معلومات القسم -->
+    <div class="info-card mb-4">
+        <div class="info-card-header">
+            <i class="fa-solid fa-info-circle"></i>
+            <h3>معلومات القسم</h3>
+        </div>
+
+        <form id="sectionForm">
+            {% csrf_token %}
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">العنوان *</label>
+                    <input type="text" name="title" class="form-control" 
+                           value="{{ section.title }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">الترتيب</label>
+                    <input type="number" name="order" class="form-control" 
+                           value="{{ section.order }}">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">الوصف</label>
+                <textarea name="description" class="form-control" rows="2">{{ section.description }}</textarea>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">الأيقونة</label>
+                    <input type="text" name="icon" class="form-control" 
+                           value="{{ section.icon }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">اللون</label>
+                    <input type="color" name="color" class="form-control" 
+                           value="{{ section.color }}" style="height:45px;">
+                </div>
+            </div>
+
+            <div class="form-check mb-3">
+                <input type="checkbox" name="is_active" class="form-check-input" 
+                       id="section_is_active" {% if section.is_active %}checked{% endif %}>
+                <label class="form-check-label" for="section_is_active">
+                    مفعّل
+                </label>
+            </div>
+
+            <button type="button" class="btn-primary" onclick="saveSection()">
+                <i class="fa-solid fa-save"></i> حفظ تعديلات القسم
+            </button>
+        </form>
+    </div>
+
+    <!-- الكروت -->
+    <div class="info-card">
+        <div class="info-card-header">
+            <i class="fa-solid fa-th-large"></i>
+            <h3>الكروت ({{ section.cards.count }})</h3>
+        </div>
+
+        {% if cards %}
+        <div class="cards-list">
+            {% for card in cards %}
+            <div class="section-card-item" id="card-row-{{ card.pk }}">
+                <div class="card-item-icon">
+                    <i class="fa-solid {{ card.icon }}"></i>
+                </div>
+                <div class="card-item-content">
+                    <div class="card-item-title">
+                        <strong>{{ card.title }}</strong>
+                        <span class="status-badge status-{{ card.card_type }}">
+                            {{ card.get_card_type_display }}
+                        </span>
+                        {% if card.is_open_default %}
+                            <span class="badge-mini" style="background:#fbbf24; color:#92400e;">
+                                مفتوح افتراضياً
+                            </span>
+                        {% endif %}
+                        {% if not card.is_active %}
+                            <span class="badge-mini" style="background:#fee2e2; color:#991b1b;">
+                                معطّل
+                            </span>
+                        {% endif %}
+                    </div>
+                    {% if card.subtitle %}
+                        <small>{{ card.subtitle }}</small>
+                    {% endif %}
+                    {% if card.content %}
+                        <p style="margin:8px 0 0 0; color:#64748b; font-size:0.85rem;">
+                            {{ card.content|striptags|truncatechars:100 }}
+                        </p>
+                    {% endif %}
+                    <div class="card-item-stats">
+                        {% if card.items.count %}
+                            <span><i class="fa-solid fa-list"></i> {{ card.items.count }} عنصر</span>
+                        {% endif %}
+                        {% if card.links.count %}
+                            <span><i class="fa-solid fa-link"></i> {{ card.links.count }} رابط</span>
+                        {% endif %}
+                        {% if card.images.count %}
+                            <span><i class="fa-solid fa-image"></i> {{ card.images.count }} صورة</span>
+                        {% endif %}
+                        {% if card.videos.count %}
+                            <span><i class="fa-solid fa-video"></i> {{ card.videos.count }} فيديو</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-item-actions">
+                    <button class="action-btn" onclick="editCard({{ card.pk }})" 
+                            title="تعديل" style="background:#dbeafe; color:#1e40af;">
+                        <i class="fa-solid fa-edit"></i>
+                    </button>
+                    <button class="action-btn" onclick="toggleCard({{ card.pk }})" 
+                            title="تفعيل/تعطيل" style="background:#fef3c7; color:#92400e;">
+                        <i class="fa-solid fa-{% if card.is_active %}eye-slash{% else %}eye{% endif %}"></i>
+                    </button>
+                    <button class="action-btn" onclick="deleteCard({{ card.pk }}, '{{ card.title|escapejs }}')" 
+                            title="حذف" style="background:#fee2e2; color:#991b1b;">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-square"></i>
+            <h3>لا توجد كروت</h3>
+            <p>ابدأ بإضافة كرت جديد</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Modal: إضافة/تعديل كرت -->
+<div class="modal fade" id="cardModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="cardModalTitle">➕ كرت جديد</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="cardForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="card_id" id="card_id">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">نوع الكرت *</label>
+                            <select name="card_type" id="card_type" class="form-select">
+                                {% for code, name in card_types %}
+                                    <option value="{{ code }}">{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">الأيقونة</label>
+                            <input type="text" name="icon" id="card_icon" class="form-control" 
+                                   value="fa-circle" placeholder="fa-check-circle">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">العنوان *</label>
+                        <input type="text" name="title" id="card_title" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الوصف المختصر</label>
+                        <input type="text" name="subtitle" id="card_subtitle" class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">المحتوى</label>
+                        <textarea name="content" id="card_content" class="form-control" rows="5" 
+                                  placeholder="يدعم HTML بسيط"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">الترتيب</label>
+                            <input type="number" name="order" id="card_order" class="form-control" value="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">&nbsp;</label>
+                            <div class="form-check" style="padding-top:10px;">
+                                <input type="checkbox" name="is_open_default" id="card_is_open_default" 
+                                       class="form-check-input">
+                                <label class="form-check-label" for="card_is_open_default">
+                                    مفتوح افتراضياً
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input type="checkbox" name="is_active" id="card_is_active" 
+                               class="form-check-input" checked>
+                        <label class="form-check-label" for="card_is_active">
+                            مفعّل
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary w-100" onclick="saveCard()">
+                    <i class="fa-solid fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.section-card-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+}
+.section-card-item:hover {
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.card-item-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    background: #dbeafe;
+    color: #1e40af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+.card-item-content {
+    flex: 1;
+    min-width: 0;
+}
+.card-item-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+.card-item-title strong {
+    color: #1e293b;
+    font-size: 1rem;
+}
+.card-item-stats {
+    display: flex;
+    gap: 15px;
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+.card-item-stats i {
+    margin-left: 4px;
+}
+.card-item-actions {
+    display: flex;
+    gap: 5px;
+}
+
+/* Badges */
+.status-accordion { background: #dbeafe; color: #1e40af; }
+.status-list { background: #d1fae5; color: #065f46; }
+.status-text { background: #f3f4f6; color: #374151; }
+.status-links { background: #fef3c7; color: #92400e; }
+</style>
+
+<script>
+function getCookie(name) {
+    let v = null;
+    if (document.cookie) {
+        const cs = document.cookie.split(';');
+        for (let i = 0; i < cs.length; i++) {
+            const c = cs[i].trim();
+            if (c.substring(0, name.length + 1) === (name + '=')) {
+                v = decodeURIComponent(c.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return v;
+}
+
+// ============ Section ============
+function saveSection() {
+    const form = document.getElementById('sectionForm');
+    const formData = new FormData(form);
+
+    fetch('{% url "panel:guide_section_update" section.pk %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ تم حفظ التعديلات');
+            location.reload();
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+
+// ============ Cards ============
+const cardsData = {
+    {% for card in cards %}
+    {{ card.pk }}: {
+        id: {{ card.pk }},
+        title: "{{ card.title|escapejs }}",
+        subtitle: "{{ card.subtitle|escapejs }}",
+        content: "{{ card.content|escapejs }}",
+        card_type: "{{ card.card_type }}",
+        icon: "{{ card.icon }}",
+        order: {{ card.order }},
+        is_open_default: {{ card.is_open_default|yesno:"true,false" }},
+        is_active: {{ card.is_active|yesno:"true,false" }},
+    },
+    {% endfor %}
+};
+
+function openAddCardModal() {
+    document.getElementById('cardForm').reset();
+    document.getElementById('card_id').value = '';
+    document.getElementById('cardModalTitle').textContent = '➕ كرت جديد';
+    new bootstrap.Modal(document.getElementById('cardModal')).show();
+}
+
+function editCard(cardId) {
+    const data = cardsData[cardId];
+    if (!data) return;
+
+    document.getElementById('card_id').value = data.id;
+    document.getElementById('card_title').value = data.title;
+    document.getElementById('card_subtitle').value = data.subtitle;
+    document.getElementById('card_content').value = data.content;
+    document.getElementById('card_type').value = data.card_type;
+    document.getElementById('card_icon').value = data.icon;
+    document.getElementById('card_order').value = data.order;
+    document.getElementById('card_is_open_default').checked = data.is_open_default;
+    document.getElementById('card_is_active').checked = data.is_active;
+    document.getElementById('cardModalTitle').textContent = '✏️ تعديل الكرت';
+
+    new bootstrap.Modal(document.getElementById('cardModal')).show();
+}
+
+function saveCard() {
+    const cardId = document.getElementById('card_id').value;
+    const form = document.getElementById('cardForm');
+    const formData = new FormData(form);
+
+    let url = '{% url "panel:guide_card_create" section.pk %}';
+    if (cardId) {
+        url = `/panel/guide/cards/${cardId}/update/`;
+    }
+
+    fetch(url, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ تم الحفظ');
+            location.reload();
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+
+function toggleCard(pk) {
+    fetch(`/panel/guide/cards/${pk}/toggle/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) location.reload();
+    })
+    .catch(() => alert('❌ خطأ'));
+}
+
+function deleteCard(pk, title) {
+    if (!confirm(`هل أنت متأكد من حذف الكرت "${title}"؟`)) return;
+
+    fetch(`/panel/guide/cards/${pk}/delete/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`card-row-${pk}`).remove();
+            alert('✅ تم الحذف');
+        }
+    })
+    .catch(() => alert('❌ خطأ'));
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if service_type == 'basic' %}استخراج شهادة الأساس
+    {% elif service_type == 'high_school' %}استخراج الشهادة السودانية
+    {% elif service_type == 'university' %}استخراج الشهادة الجامعية
+    {% endif %}
+    - {{ SITE_NAME }}
+{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/certificates/style.css' %}">
+
+<div class="page-hero">
+    <h1>
+        {% if service_type == 'basic' %}🎓 استخراج شهادة الأساس
+        {% elif service_type == 'high_school' %}🎓 استخراج الشهادة السودانية
+        {% elif service_type == 'university' %}🎓 استخراج الشهادة الجامعية
+        {% endif %}
+    </h1>
+    <p>املأ البيانات التالية وسيتم فتح واتساب تلقائياً</p>
+</div>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            {% if messages %}
+                {% for msg in messages %}
+                    <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" class="cert-form">
+                {% csrf_token %}
+
+                <!-- ============ البيانات الأساسية ============ -->
+                <div class="cert-form-card">
+                    <div class="cert-form-header">
+                        <i class="bi bi-person-fill"></i>
+                        <h3>بياناتك الأساسية</h3>
+                    </div>
+
+                    <div class="cert-form-body">
+                        <div class="cert-form-group">
+                            <label>الاسم الكامل <span class="required">*</span></label>
+                            <input type="text" name="full_name" required
+                                   placeholder="أدخل اسمك الكامل">
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>رقم الهاتف (واتساب) <span class="required">*</span></label>
+                            <input type="tel" name="phone_number" required
+                                   placeholder="+249xxxxxxxxx">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ النموذج الخاص بكل خدمة ============ -->
+
+                {% if service_type == 'basic' %}
+                <!-- ============ شهادة الأساس ============ -->
+                <div class="cert-form-card">
+                    <div class="cert-form-header">
+                        <i class="bi bi-list-check"></i>
+                        <h3>بيانات شهادة الأساس</h3>
+                    </div>
+
+                    <div class="cert-form-body">
+                        <div class="cert-form-group">
+                            <label>صورة فوتوغرافية <span class="required">*</span></label>
+                            <select name="photo_available" required>
+                                <option value="">هل لديك صورة فوتوغرافية حديثة؟</option>
+                                <option value="نعم - لدي صورة حديثة">نعم - لدي صورة حديثة</option>
+                                <option value="لا - أحتاج صور">لا - أحتاج صور</option>
+                            </select>
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>إثبات شخصية <span class="required">*</span></label>
+                            <input type="text" name="national_id" required
+                                   placeholder="شهادة ميلاد / رقم وطني">
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>اسم المدرسة <span class="required">*</span></label>
+                            <input type="text" name="school_name" required
+                                   placeholder="اسم مدرسة الأساس">
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>رقم الجلوس <span class="required">*</span></label>
+                            <input type="text" name="seat_number" required
+                                   placeholder="رقم الجلوس">
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>الولاية <span class="required">*</span></label>
+                            <input type="text" name="state" required
+                                   placeholder="الولاية التي جلس بها الامتحان">
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>نوع الشهادة <span class="required">*</span></label>
+                            <select name="cert_language" required>
+                                <option value="">اختر نوع الشهادة</option>
+                                <option value="عربي">عربي</option>
+                                <option value="إنجليزي">إنجليزي</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {% elif service_type == 'high_school' %}
+                <!-- ============ الشهادة السودانية ============ -->
+                <div class="cert-form-card">
+                    <div class="cert-form-header">
+                        <i class="bi bi-list-check"></i>
+                        <h3>بيانات الشهادة السودانية</h3>
+                    </div>
+
+                    <div class="cert-form-body">
+                        <div class="cert-form-group">
+                            <label>إثبات شخصية <span class="required">*</span></label>
+                            <input type="text" name="national_id" required
+                                   placeholder="رقم وطني / شهادة ميلاد">
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>رقم الجلوس <span class="required">*</span></label>
+                            <input type="text" name="seat_number" required
+                                   placeholder="رقم الجلوس">
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>اسم المدرسة <span class="required">*</span></label>
+                            <input type="text" name="school_name" required
+                                   placeholder="اسم المدرسة الثانوية">
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>العام (سنة الامتحان) <span class="required">*</span></label>
+                            <select name="exam_year" required>
+                                <option value="">اختر العام</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                                <option value="2021">2021</option>
+                                <option value="2020">2020</option>
+                            </select>
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>النسبة <span class="required">*</span></label>
+                            <input type="text" name="percentage" required
+                                   placeholder="مثال: 85.5">
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>المساق <span class="required">*</span></label>
+                            <select name="stream" required>
+                                <option value="">اختر المساق</option>
+                                <option value="علمي">علمي</option>
+                                <option value="أدبي">أدبي</option>
+                            </select>
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>اسم الوالدة <span class="required">*</span></label>
+                            <input type="text" name="mother_name" required
+                                   placeholder="اسم الوالدة">
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>لغة الشهادة <span class="required">*</span></label>
+                            <select name="cert_language" required>
+                                <option value="">اختر اللغة</option>
+                                <option value="عربي">عربي</option>
+                                <option value="إنجليزي">إنجليزي</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {% elif service_type == 'university' %}
+                <!-- ============ الشهادة الجامعية ============ -->
+                <div class="cert-form-card">
+                    <div class="cert-form-header">
+                        <i class="bi bi-list-check"></i>
+                        <h3>بيانات الشهادة الجامعية</h3>
+                    </div>
+
+                    <div class="cert-form-body">
+                        <div class="cert-form-group">
+                            <label>صورة فوتوغرافية <span class="required">*</span></label>
+                            <select name="photo_available" required>
+                                <option value="">هل لديك صورة حديثة؟</option>
+                                <option value="نعم - لدي صورة حديثة">نعم - لدي صورة حديثة</option>
+                                <option value="لا - أحتاج صور">لا - أحتاج صور</option>
+                            </select>
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>الرقم الجامعي <span class="required">*</span></label>
+                            <input type="text" name="university_id" required
+                                   placeholder="الرقم الجامعي">
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>الكلية / التخصص <span class="required">*</span></label>
+                            <input type="text" name="college_major" required
+                                   placeholder="مثال: كلية الطب">
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>تاريخ الدخول <span class="required">*</span></label>
+                            <input type="date" name="enroll_date" required>
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>تاريخ التخرج <span class="required">*</span></label>
+                            <input type="date" name="grad_date" required>
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>إثبات شخصية <span class="required">*</span></label>
+                            <input type="text" name="national_id" required
+                                   placeholder="رقم وطني / شهادة ميلاد">
+                        </div>
+
+                        <div class="cert-form-group">
+                            <label>نوع الشهادة <span class="required">*</span></label>
+                            <select name="cert_language" required>
+                                <option value="">اختر النوع</option>
+                                <option value="عربي">عربي</option>
+                                <option value="إنجليزي">إنجليزي</option>
+                                <option value="تفاصيل">تفاصيل</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- زر الإرسال -->
+                <button type="submit" class="cert-submit-btn">
+                    <i class="bi bi-whatsapp"></i>
+                    إرسال الطلب عبر واتساب
+                </button>
+            </form>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'certificates:index' %}" class="btn-outline">
+                    <i class="bi bi-arrow-right"></i>
+                    العودة للخدمات
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

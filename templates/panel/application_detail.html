@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تفاصيل الطلب - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/panel.css' %}">
+
+<div class="page-hero">
+    <h1>📄 تفاصيل الطلب</h1>
+    <p>{{ application.application_code }}</p>
+</div>
+
+<div class="container py-5">
+
+    <div class="panel-toolbar">
+        <a href="{% url 'panel:applications' %}" class="btn-outline btn-sm">
+            <i class="fa-solid fa-arrow-right"></i> العودة للقائمة
+        </a>
+        <div>
+            <span class="status-badge status-{{ application.status }}" id="statusBadge">
+                {{ application.get_status_display }}
+            </span>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+
+        <!-- البيانات -->
+        <div class="info-card">
+            <div class="info-card-header">
+                <i class="fa-solid fa-user"></i>
+                <h3>بيانات الطالب</h3>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">رقم الطلب:</div>
+                <div class="value"><code>{{ application.application_code }}</code></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">الاسم الكامل:</div>
+                <div class="value"><strong>{{ application.full_name }}</strong></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">رقم الجلوس:</div>
+                <div class="value">{{ application.seat_number }}</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">رقم الهاتف:</div>
+                <div class="value">
+                    {{ application.phone_number }}
+                    <a href="{{ wa_link }}" target="_blank" class="btn-whatsapp btn-sm" style="display:inline-flex; padding:5px 12px; margin-right:10px; border-radius:6px; color:white; text-decoration:none;">
+                        <i class="fa-brands fa-whatsapp"></i> واتساب
+                    </a>
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">الولاية:</div>
+                <div class="value">{{ application.state_display }}</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">سنة الامتحان:</div>
+                <div class="value">{{ application.exam_year }}</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">المساق:</div>
+                <div class="value">
+                    <span class="stream-badge stream-{{ application.stream }}">
+                        {{ application.stream_display }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">المادة الاختيارية:</div>
+                <div class="value">{{ application.optional_subject }}</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">نوع التقديم:</div>
+                <div class="value">
+                    <span class="type-badge type-{{ application.application_type }}">
+                        {{ application.type_display }}
+                    </span>
+                </div>
+            </div>
+
+            {% if application.failed_subjects %}
+            <div class="detail-item">
+                <div class="label">المواد الراسب بها:</div>
+                <div class="value">{{ application.failed_subjects }}</div>
+            </div>
+            {% endif %}
+
+            <div class="detail-item">
+                <div class="label">تاريخ التقديم:</div>
+                <div class="value">{{ application.submitted_at|date:"Y-m-d H:i" }}</div>
+            </div>
+
+            {% if application.admin_notes %}
+            <div class="detail-item">
+                <div class="label">ملاحظات الإدارة:</div>
+                <div class="value">{{ application.admin_notes }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- الإجراءات + الملف -->
+        <div>
+            <!-- الملف المرفق -->
+            {% if application.preferences_file %}
+            <div class="info-card mb-3">
+                <div class="info-card-header">
+                    <i class="fa-solid fa-paperclip"></i>
+                    <h3>ترتيب الرغبات</h3>
+                </div>
+                <div class="file-preview">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <a href="{{ application.preferences_file.url }}" target="_blank">
+                        <i class="fa-solid fa-download"></i> تحميل الملف
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- تغيير الحالة -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fa-solid fa-edit"></i>
+                    <h3>تغيير الحالة</h3>
+                </div>
+
+                <div class="action-panel">
+                    <button class="action-btn-lg btn-warning" onclick="changeStatus('reviewed')">
+                        <i class="fa-solid fa-clock"></i>
+                        قيد المراجعة
+                    </button>
+                    <button class="action-btn-lg btn-success" onclick="changeStatus('accepted')">
+                        <i class="fa-solid fa-check-circle"></i>
+                        قبول الطلب
+                    </button>
+                    <button class="action-btn-lg btn-danger" onclick="changeStatus('rejected')">
+                        <i class="fa-solid fa-times-circle"></i>
+                        رفض الطلب
+                    </button>
+                    <button class="action-btn-lg btn-info" onclick="changeStatus('pending')">
+                        <i class="fa-solid fa-rotate"></i>
+                        إعادة إلى جديد
+                    </button>
+                </div>
+            </div>
+
+            <!-- ملاحظات -->
+            <div class="info-card mt-3">
+                <div class="info-card-header">
+                    <i class="fa-solid fa-comment"></i>
+                    <h3>ملاحظات الإدارة</h3>
+                </div>
+
+                <textarea id="adminNotes" rows="4" 
+                          style="width:100%; padding:12px; border:2px solid #e5e7eb; border-radius:10px; font-family:inherit;"
+                          placeholder="أضف ملاحظات...">{{ application.admin_notes }}</textarea>
+
+                <button class="btn-primary" onclick="saveNotes()" 
+                        style="margin-top:10px; width:100%; padding:12px;">
+                    <i class="fa-solid fa-save"></i> حفظ الملاحظات
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function changeStatus(status) {
+    if (!confirm('هل تريد تغيير الحالة؟')) return;
+
+    const formData = new FormData();
+    formData.append('status', status);
+
+    fetch('{% url "panel:application_update_status" application.pk %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const badge = document.getElementById('statusBadge');
+            badge.className = 'status-badge status-' + data.new_status;
+            badge.textContent = data.display;
+            alert('✅ تم تحديث الحالة: ' + data.display);
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+
+function saveNotes() {
+    const notes = document.getElementById('adminNotes').value;
+
+    const formData = new FormData();
+    formData.append('notes', notes);
+
+    fetch('{% url "panel:application_update_notes" application.pk %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ تم حفظ الملاحظات');
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+</script>
+
+{% endblock %}

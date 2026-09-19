@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}طلب شهادة - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<div class="page-hero">
+    <h1>📝 طلب شهادة</h1>
+    <p>املأ البيانات التالية وسنتواصل معك</p>
+</div>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            {% if errors %}
+                <div class="alert alert-danger">
+                    <h5>⚠️ تنبيهات:</h5>
+                    <ul class="mb-0">
+                        {% for err in errors %}
+                            <li>{{ err }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            {% if messages %}
+                {% for msg in messages %}
+                    <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" class="custom-form">
+                {% csrf_token %}
+
+                <!-- البيانات الأساسية -->
+                <div class="info-card mb-4">
+                    <div class="info-card-header">
+                        <i class="fa-solid fa-user"></i>
+                        <h3>1. بياناتك</h3>
+                    </div>
+
+                    <div class="form-group">
+                        <label>الاسم الكامل <span class="required">*</span></label>
+                        <input type="text" name="full_name"
+                               placeholder="الاسم كما في الشهادة"
+                               value="{{ form_data.full_name|default:'' }}"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>رقم الهاتف (واتساب) <span class="required">*</span></label>
+                        <input type="tel" name="phone_number"
+                               placeholder="+249xxxxxxxxx"
+                               value="{{ form_data.phone_number|default:'' }}"
+                               required>
+                    </div>
+                </div>
+
+                <!-- نوع الخدمة -->
+                <div class="info-card mb-4">
+                    <div class="info-card-header">
+                        <i class="fa-solid fa-list"></i>
+                        <h3>2. نوع الخدمة</h3>
+                    </div>
+
+                    <div class="form-group">
+                        <select name="service_type" required>
+                            <option value="">اختر نوع الخدمة...</option>
+                            {% for code, name in service_types %}
+                                <option value="{{ code }}"
+                                    {% if form_data.service_type == code or selected_service == code %}selected{% endif %}>
+                                    {{ name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- المرفقات -->
+                <div class="info-card mb-4">
+                    <div class="info-card-header">
+                        <i class="fa-solid fa-paperclip"></i>
+                        <h3>3. المرفقات</h3>
+                    </div>
+
+                    <div class="form-group">
+                        <label>صورة الشهادة (اختياري)</label>
+                        <input type="file" name="certificate_file" 
+                               accept=".jpg,.jpeg,.png,.pdf"
+                               class="file-input">
+                        <small class="form-help">
+                            <i class="fa-solid fa-info-circle"></i>
+                            الحجم الأقصى: 5 ميجابايت
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>صورة الرقم الوطني (اختياري)</label>
+                        <input type="file" name="national_id_file" 
+                               accept=".jpg,.jpeg,.png,.pdf"
+                               class="file-input">
+                    </div>
+                </div>
+
+                <!-- تفاصيل إضافية -->
+                <div class="info-card mb-4">
+                    <div class="info-card-header">
+                        <i class="fa-solid fa-comment"></i>
+                        <h3>4. تفاصيل إضافية</h3>
+                    </div>
+
+                    <div class="form-group">
+                        <label>أي معلومات مهمة</label>
+                        <textarea name="details" 
+                                  placeholder="مثال: الشهادة صادرة من جامعة الخرطوم سنة 2020..."
+                                  >{{ form_data.details|default:'' }}</textarea>
+                    </div>
+                </div>
+
+                <!-- زر الإرسال -->
+                <button type="submit" class="submit-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    إرسال الطلب
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

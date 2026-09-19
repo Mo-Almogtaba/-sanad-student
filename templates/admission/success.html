@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تم استلام طلبك - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<div class="page-hero">
+    <h1>✅ تم استلام طلبك</h1>
+    <p>شكراً لثقتك بـ {{ SITE_NAME }}</p>
+</div>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+
+            <div class="info-card text-center">
+                <i class="fa-solid fa-check-circle fa-5x text-success mb-3"></i>
+                <h2>تم استلام طلبك بنجاح!</h2>
+                <p class="lead">رقم طلبك هو:</p>
+
+                <div style="background:#f0f7ff; border:2px dashed #1e40af; padding:20px; border-radius:12px; margin:20px 0;">
+                    <h1 style="color:#1e40af; margin:0; font-family:monospace; letter-spacing:2px;">
+                        {{ application.application_code }}
+                    </h1>
+                </div>
+
+                <div class="alert alert-warning">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <strong>مهم:</strong> احتفظ بهذا الرقم للمتابعة
+                </div>
+            </div>
+
+            <div class="info-card mt-4">
+                <div class="info-card-header">
+                    <i class="fa-solid fa-list-check"></i>
+                    <h3>ملخص الطلب</h3>
+                </div>
+
+                <table class="table">
+                    <tr>
+                        <td><strong>الاسم:</strong></td>
+                        <td>{{ application.full_name }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>رقم الجلوس:</strong></td>
+                        <td>{{ application.seat_number }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>الولاية:</strong></td>
+                        <td>{{ application.state_display }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>سنة الامتحان:</strong></td>
+                        <td>{{ application.exam_year }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>المساق:</strong></td>
+                        <td>{{ application.stream_display }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>نوع التقديم:</strong></td>
+                        <td>{{ application.type_display }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>الحالة:</strong></td>
+                        <td>
+                            <span class="badge" style="background:#ffc107;">
+                                {{ application.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="info-card mt-4 text-center">
+                <p>للمتابعة، تواصل معنا عبر واتساب:</p>
+                <a href="{{ wa_link }}" target="_blank" class="whatsapp-btn" style="display:inline-flex;">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    تأكيد الطلب على واتساب
+                </a>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'home:index' %}" class="btn-outline" style="display:inline-flex;">
+                    <i class="fa-solid fa-home"></i>
+                    العودة للرئيسية
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

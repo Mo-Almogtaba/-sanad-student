@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}التقديم الإلكتروني - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<div class="page-hero">
+    <h1>📝 التقديم الإلكتروني</h1>
+    <p>قدّم طلبك للجامعات السودانية إلكترونياً</p>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-lg-8 mx-auto">
+
+            {% if requires_access %}
+                <!-- الزائر بدون كود -->
+                <div class="info-card text-center">
+                    <i class="fa-solid fa-lock fa-3x text-warning mb-3"></i>
+                    <h3>مطلوب كود وصول</h3>
+                    <p class="text-muted">
+                        للتقديم الإلكتروني، تحتاج أولاً إلى الحصول على كود وصول.
+                    </p>
+                    <a href="{% url 'ranks:index' %}" class="btn-primary" style="display:inline-flex;">
+                        <i class="fa-solid fa-arrow-right"></i>
+                        الذهاب لطلب كود
+                    </a>
+                </div>
+            {% else %}
+
+                {% if errors %}
+                    <div class="alert alert-danger">
+                        <h5>⚠️ تنبيهات:</h5>
+                        <ul class="mb-0">
+                            {% for err in errors %}
+                                <li>{{ err }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                {% if messages %}
+                    {% for msg in messages %}
+                        <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data" class="custom-form" id="admissionForm">
+                    {% csrf_token %}
+
+                    <!-- القسم 1: بيانات الطالب -->
+                    <div class="info-card mb-4">
+                        <div class="info-card-header">
+                            <i class="fa-solid fa-user"></i>
+                            <h3>1. بيانات الطالب</h3>
+                        </div>
+
+                        <div class="form-group">
+                            <label>الاسم الرباعي <span class="required">*</span></label>
+                            <input type="text" name="full_name" 
+                                   placeholder="الاسم الأول - الأب - الجد - العائلة"
+                                   value="{{ form_data.full_name|default:'' }}"
+                                   required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>رقم الجلوس <span class="required">*</span></label>
+                                    <input type="text" name="seat_number"
+                                           value="{{ form_data.seat_number|default:'' }}"
+                                           required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>رقم الواتساب <span class="required">*</span></label>
+                                    <input type="tel" name="phone_number"
+                                           placeholder="+249xxxxxxxxx"
+                                           value="{{ form_data.phone_number|default:'' }}"
+                                           required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- القسم 2: بيانات الامتحان -->
+                    <div class="info-card mb-4">
+                        <div class="info-card-header">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                            <h3>2. بيانات الامتحان</h3>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>الولاية <span class="required">*</span></label>
+                                    <select name="state" required>
+                                        <option value="">اختر الولاية...</option>
+                                        {% for code, name in STATES %}
+                                            <option value="{{ code }}" 
+                                                {% if form_data.state == code %}selected{% endif %}>
+                                                {{ name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>سنة الامتحان <span class="required">*</span></label>
+                                    <select name="exam_year" required>
+                                        <option value="">اختر السنة...</option>
+                                        {% for year in EXAM_YEARS %}
+                                            <option value="{{ year }}"
+                                                {% if form_data.exam_year|stringformat:"s" == year|stringformat:"s" %}selected{% endif %}>
+                                                {{ year }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>المساق <span class="required">*</span></label>
+                            <div style="display:flex; gap:20px; margin-top:8px;">
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="radio" name="stream" value="scientific" 
+                                        {% if not form_data.stream or form_data.stream == 'scientific' %}checked{% endif %}>
+                                    <span>علمي</span>
+                                </label>
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="radio" name="stream" value="literary"
+                                        {% if form_data.stream == 'literary' %}checked{% endif %}>
+                                    <span>أدبي</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>المادة الاختيارية <span class="required">*</span></label>
+                            <input type="text" name="optional_subject"
+                                   placeholder="مثال: الرياضيات، الفيزياء، التاريخ..."
+                                   value="{{ form_data.optional_subject|default:'' }}"
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- القسم 3: نوع التقديم -->
+                    <div class="info-card mb-4">
+                        <div class="info-card-header">
+                            <i class="fa-solid fa-list-check"></i>
+                            <h3>3. نوع التقديم</h3>
+                        </div>
+
+                        <div class="service-options" style="grid-template-columns: 1fr 1fr;">
+                            <label class="service-option">
+                                <input type="radio" name="application_type" value="bachelor" 
+                                       {% if not form_data.application_type or form_data.application_type == 'bachelor' %}checked{% endif %}
+                                       onchange="toggleFailedSubjects()">
+                                <div class="option-content">
+                                    <i class="fa-solid fa-graduation-cap"></i>
+                                    <strong>بكالوريوس</strong>
+                                    <small>التقديم للجامعات</small>
+                                </div>
+                            </label>
+
+                            <label class="service-option">
+                                <input type="radio" name="application_type" value="diploma"
+                                       {% if form_data.application_type == 'diploma' %}checked{% endif %}
+                                       onchange="toggleFailedSubjects()">
+                                <div class="option-content">
+                                    <i class="fa-solid fa-certificate"></i>
+                                    <strong>دبلوم</strong>
+                                    <small>التقديم للدبلومات</small>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="form-group" id="failedSubjectsGroup" style="display:none;">
+                            <label>المواد الراسب بها <span class="required">*</span></label>
+                            <textarea name="failed_subjects" 
+                                      placeholder="اذكر المواد التي رسبت بها...">{{ form_data.failed_subjects|default:'' }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- القسم 4: ترتيب الرغبات -->
+                    <div class="info-card mb-4">
+                        <div class="info-card-header">
+                            <i class="fa-solid fa-file-upload"></i>
+                            <h3>4. ترتيب الرغبات</h3>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fa-solid fa-info-circle"></i>
+                            <strong>مطلوب:</strong> ارفع صورة/PDF لترتيب رغباتك
+                            <br>
+                            💡 يمكنك الحصول على الترتيب من 
+                            <a href="{% url 'ranks:index' %}" target="_blank">
+                                نظام ترتيب الرغبات
+                            </a>
+                        </div>
+
+                        <div class="form-group">
+                            <label>ملف ترتيب الرغبات (صورة أو PDF) <span class="required">*</span></label>
+                            <input type="file" name="preferences_file" 
+                                   accept=".jpg,.jpeg,.png,.pdf"
+                                   class="file-input" required>
+                            <small class="form-help">
+                                <i class="fa-solid fa-info-circle"></i>
+                                الحجم الأقصى: 5 ميجابايت
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- زر الإرسال -->
+                    <button type="submit" class="submit-btn">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        إرسال الطلب
+                    </button>
+
+                </form>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleFailedSubjects() {
+    const diploma = document.querySelector('input[name="application_type"][value="diploma"]').checked;
+    const group = document.getElementById('failedSubjectsGroup');
+    
+    if (diploma) {
+        group.style.display = 'block';
+        group.querySelector('textarea').required = true;
+    } else {
+        group.style.display = 'none';
+        group.querySelector('textarea').required = false;
+    }
+}
+
+// ✅ التشغيل عند التحميل
+document.addEventListener('DOMContentLoaded', toggleFailedSubjects);
+</script>
+{% endblock %}

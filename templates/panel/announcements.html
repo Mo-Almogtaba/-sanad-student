@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إدارة الإعلانات - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/panel.css' %}">
+
+<div class="page-hero">
+    <h1>📢 إدارة الإعلانات</h1>
+    <p>إجمالي: {{ total }} إعلان</p>
+</div>
+
+<div class="container py-5">
+
+    <div class="panel-toolbar">
+        <a href="{% url 'panel:dashboard' %}" class="btn-outline btn-sm">
+            <i class="fa-solid fa-arrow-right"></i> العودة
+        </a>
+        <button class="btn-primary btn-sm" onclick="openAddModal()">
+            <i class="fa-solid fa-plus"></i> إعلان جديد
+        </button>
+    </div>
+
+    <!-- الفلاتر -->
+    <div class="filter-card">
+        <form method="get">
+            <div class="filter-row" style="grid-template-columns: 2fr 1fr auto;">
+                <div class="filter-item">
+                    <label>🔍 بحث</label>
+                    <input type="text" name="q" value="{{ search }}" 
+                           placeholder="العنوان، الوصف...">
+                </div>
+
+                <div class="filter-item">
+                    <label>الحالة</label>
+                    <select name="status">
+                        <option value="">الكل</option>
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>مفعّل</option>
+                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>معطّل</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-primary btn-sm">
+                        <i class="fa-solid fa-search"></i> تطبيق
+                    </button>
+                    <a href="{% url 'panel:announcements' %}" class="btn-outline btn-sm">
+                        <i class="fa-solid fa-eraser"></i> مسح
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- الجدول -->
+    <div class="info-card">
+        {% if announcements %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>معاينة</th>
+                        <th>العنوان</th>
+                        <th>الرابط</th>
+                        <th>الترتيب</th>
+                        <th>الحالة</th>
+                        <th>التاريخ</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ann in announcements %}
+                    <tr id="row-{{ ann.pk }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            {% if ann.image %}
+                                <img src="{{ ann.image.url }}" 
+                                     style="width:80px; height:40px; object-fit:cover; border-radius:6px;">
+                            {% else %}
+                                <div style="width:80px; height:40px; border-radius:6px; background: {{ ann.bg_color }};"></div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ ann.title }}</strong>
+                            {% if ann.description %}
+                                <br>
+                                <small class="text-muted">{{ ann.description|truncatechars:50 }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if ann.link %}
+                                <code style="font-size:0.75rem;">{{ ann.link|truncatechars:25 }}</code>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ ann.order }}</td>
+                        <td>
+                            <span class="status-badge {% if ann.is_active %}status-accepted{% else %}status-rejected{% endif %}">
+                                {% if ann.is_active %}✅ مفعّل{% else %}⏸️ معطّل{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <small>{{ ann.created_at|date:"Y-m-d" }}</small>
+                        </td>
+                        <td>
+                            <a href="{% url 'panel:announcement_detail' ann.pk %}" 
+                               class="action-btn btn-view" title="تعديل">
+                                <i class="fa-solid fa-edit"></i>
+                            </a>
+                            <button class="action-btn" 
+                                    onclick="toggleAnn({{ ann.pk }})" 
+                                    title="{% if ann.is_active %}تعطيل{% else %}تفعيل{% endif %}"
+                                    style="background:#fef3c7; color:#92400e;">
+                                <i class="fa-solid fa-{% if ann.is_active %}eye-slash{% else %}eye{% endif %}"></i>
+                            </button>
+                            <button class="action-btn" 
+                                    onclick="deleteAnn({{ ann.pk }}, '{{ ann.title|escapejs }}')" 
+                                    title="حذف"
+                                    style="background:#fee2e2; color:#991b1b;">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-bullhorn"></i>
+            <h3>لا توجد إعلانات</h3>
+            <p>ابدأ بإضافة إعلان جديد</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+
+<!-- Modal: إضافة إعلان -->
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">➕ إضافة إعلان جديد</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">العنوان *</label>
+                        <input type="text" name="title" class="form-control" required 
+                               placeholder="مثال: احصل على محاولات لا نهائية!">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الوصف</label>
+                        <textarea name="description" class="form-control" rows="2" 
+                                  placeholder="نص مختصر يظهر تحت العنوان"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">الرابط</label>
+                            <input type="text" name="link" class="form-control" 
+                                   placeholder="/ranks/ أو https://...">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">نص الزر</label>
+                            <input type="text" name="button_text" class="form-control" 
+                                   value="اعرف المزيد">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label fw-bold">لون الخلفية</label>
+                            <input type="text" name="bg_color" class="form-control" 
+                                   value="linear-gradient(135deg, #1e40af, #3b82f6)">
+                            <small class="text-muted">CSS gradient أو لون عادي</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">الترتيب</label>
+                            <input type="number" name="order" class="form-control" value="0">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الصورة (اختياري)</label>
+                        <input type="file" name="image" class="form-control" 
+                               accept="image/*">
+                        <small class="text-muted">المقاس المثالي: 1200×400 بكسل</small>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input type="checkbox" name="is_active" class="form-check-input" 
+                               id="add_is_active" checked>
+                        <label class="form-check-label" for="add_is_active">
+                            مفعّل
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary w-100" onclick="createAnn()">
+                    <i class="fa-solid fa-save"></i> حفظ الإعلان
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function getCookie(name) {
+    let v = null;
+    if (document.cookie) {
+        const cs = document.cookie.split(';');
+        for (let i = 0; i < cs.length; i++) {
+            const c = cs[i].trim();
+            if (c.substring(0, name.length + 1) === (name + '=')) {
+                v = decodeURIComponent(c.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return v;
+}
+
+function openAddModal() {
+    document.getElementById('addForm').reset();
+    new bootstrap.Modal(document.getElementById('addModal')).show();
+}
+
+function createAnn() {
+    const form = document.getElementById('addForm');
+    const formData = new FormData(form);
+
+    fetch('{% url "panel:announcement_add" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ تم إضافة الإعلان');
+            location.reload();
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+
+function toggleAnn(pk) {
+    fetch(`/panel/announcements/${pk}/toggle/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+
+function deleteAnn(pk, title) {
+    if (!confirm(`هل أنت متأكد من حذف الإعلان "${title}"؟`)) return;
+
+    fetch(`/panel/announcements/${pk}/delete/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`row-${pk}`).remove();
+            alert('✅ تم الحذف');
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+</script>
+
+{% endblock %}

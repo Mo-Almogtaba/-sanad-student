@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}بيانات الجامعات - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/panel.css' %}">
+<link rel="stylesheet" href="{% static 'css/data_entry.css' %}">
+
+<div class="page-hero">
+    <h1>📊 إدارة بيانات الجامعات</h1>
+    <p>أدخل الجامعات والكليات والنسب بسهولة</p>
+</div>
+
+<div class="container py-5">
+
+    <div class="panel-toolbar">
+        <a href="{% url 'panel:dashboard' %}" class="btn-outline btn-sm">
+            <i class="fa-solid fa-arrow-right"></i> العودة
+        </a>
+        <div class="stats-mini">
+            <span>
+                <i class="fa-solid fa-building-columns"></i>
+                <strong id="statUniversities">0</strong> جامعة
+            </span>
+            <span>
+                <i class="fa-solid fa-school"></i>
+                <strong id="statFaculties">0</strong> كلية
+            </span>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- نموذج الإدخال -->
+    <!-- ========================================================= -->
+    <div class="entry-card">
+        <div class="entry-card-header">
+            <i class="fa-solid fa-plus-circle"></i>
+            <h3>إضافة كلية ونسبة جديدة</h3>
+        </div>
+
+        <div class="entry-form">
+            <!-- اختر الجامعة -->
+            <div class="form-row">
+                <div class="form-col-full">
+                    <label class="form-label">
+                        <i class="fa-solid fa-building-columns"></i>
+                        1. اختر الجامعة
+                    </label>
+                    <div class="university-row">
+                        <select id="universitySelect" class="form-input form-select">
+                            <option value="">-- اختر الجامعة --</option>
+                            {% for uni in universities %}
+                                <option value="{{ uni.pk }}" data-name="{{ uni.name }}">
+                                    {{ uni.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" class="btn-add-uni" onclick="openUniversityModal()">
+                            <i class="fa-solid fa-plus"></i>
+                            جامعة جديدة
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- اسم الكلية -->
+            <div class="form-row">
+                <div class="form-col-full">
+                    <label class="form-label">
+                        <i class="fa-solid fa-school"></i>
+                        2. اسم الكلية
+                    </label>
+                    <input type="text" id="facultyName" class="form-input"
+                           placeholder="مثال: كلية الطب"
+                           autocomplete="off">
+                    <small class="form-hint">أدخل اسم الكلية كما في الدليل</small>
+                </div>
+            </div>
+
+            <!-- النسبة -->
+            <div class="form-row">
+                <div class="form-col-half">
+                    <label class="form-label">
+                        <i class="fa-solid fa-percent"></i>
+                        3. الحد الأدنى للنسبة
+                    </label>
+                    <input type="number" id="minPercentage" class="form-input"
+                           placeholder="مثال: 92.7"
+                           step="0.1" min="0" max="100"
+                           autocomplete="off">
+                    <small class="form-hint">بين 0 و 100</small>
+                </div>
+                <div class="form-col-half">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="button" class="btn-save" onclick="saveFaculty()" id="saveBtn">
+                        <i class="fa-solid fa-save"></i>
+                        حفظ وإضافة أخرى
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- رسالة -->
+        <div id="formMessage" class="form-message"></div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- جدول الكليات -->
+    <!-- ========================================================= -->
+    <div class="faculties-card">
+        <div class="faculties-card-header">
+            <div>
+                <i class="fa-solid fa-list"></i>
+                <h3 id="facultiesTitle">اختر جامعة لعرض كلياتها</h3>
+            </div>
+            <div class="faculties-actions">
+                <button type="button" class="btn-mini" onclick="reloadFaculties()">
+                    <i class="fa-solid fa-refresh"></i>
+                    تحديث
+                </button>
+            </div>
+        </div>
+
+        <div id="facultiesContent">
+            <div class="empty-state">
+                <i class="fa-solid fa-hand-pointer"></i>
+                <h3>اختر جامعة من القائمة أعلاه</h3>
+                <p>سيتم عرض جميع كلياتها مع النسب</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ========================================================= -->
+<!-- Modal: إضافة جامعة جديدة -->
+<!-- ========================================================= -->
+<div class="modal fade" id="universityModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    إضافة جامعة جديدة
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group-modal">
+                    <label class="modal-label">اسم الجامعة *</label>
+                    <input type="text" id="newUniversityName" class="form-input"
+                           placeholder="مثال: جامعة الخرطوم" autocomplete="off">
+                </div>
+                <div class="form-group-modal">
+                    <label class="modal-label">النوع *</label>
+                    <select id="newUniversityType" class="form-input form-select">
+                        <option value="government">🏛️ حكومية</option>
+                        <option value="private">🏢 خاصة</option>
+                        <option value="international">🌍 دولية</option>
+                    </select>
+                </div>
+                <div id="modalMessage" class="form-message"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-save w-100" onclick="createUniversity()">
+                    <i class="fa-solid fa-save"></i>
+                    حفظ الجامعة
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/data_entry.js' %}"></script>
+{% endblock %}

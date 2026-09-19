@@ -1,0 +1,30 @@
+<header class="header">
+    <div class="header-container">
+        <div class="logo" onclick="window.location.href='{% url 'home:index' %}'">
+            <div class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+            <div class="logo-text">
+                <span class="brand">{{ SITE_NAME }}</span>
+                <span class="tagline">{{ SITE_TAGLINE }}</span>
+            </div>
+        </div>
+        
+        <nav class="nav-menu" id="navMenu">
+            <a class="nav-link {% if request.resolver_match.app_name == 'home' %}active{% endif %}" 
+               href="{% url 'home:index' %}">الرئيسية</a>
+            <a class="nav-link {% if request.resolver_match.app_name == 'admission' %}active{% endif %}" 
+               href="{% url 'admission:index' %}">التقديم</a>
+            <a class="nav-link {% if request.resolver_match.app_name == 'scholarships' %}active{% endif %}" 
+               href="{% url 'scholarships:index' %}">المنح</a>
+            <a class="nav-link {% if request.resolver_match.app_name == 'certificates' %}active{% endif %}" 
+               href="{% url 'certificates:index' %}">الشهادات</a>
+            <a class="nav-link {% if request.resolver_match.app_name == 'guide' %}active{% endif %}" 
+               href="{% url 'guide:index' %}">دليل التقديم</a>
+            <a class="nav-link {% if request.resolver_match.app_name == 'contact' %}active{% endif %}" 
+               href="{% url 'contact:index' %}">اتصل بنا</a>
+        </nav>
+        
+        <button class="menu-toggle" onclick="toggleMenu()" aria-label="القائمة">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+</header>

@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}الشهادات والتوثيق - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/ranks/style.css' %}">
+
+<div class="page-hero">
+    <h1>📜 الشهادات والتوثيق</h1>
+    <p>خدمات متكاملة لاستخراج الشهادات وتوثيقها</p>
+</div>
+
+<div class="container py-5">
+
+    <div class="row g-4">
+
+        <!-- معلومات الخدمات -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">🎯 الخدمات المتوفرة</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            استخراج شهادة الثانوية العامة
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            توثيق الشهادات من الجهات المختصة
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            استخراج بدل فاقد للشهادات
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            تعديل البيانات في الشهادات
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            ترجمة معتمدة للشهادات
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- خطوات الطلب -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">📋 خطوات الطلب</h5>
+                </div>
+                <div class="card-body">
+                    <div class="step-item">
+                        <span class="step-number">1</span>
+                        <div>
+                            <strong>تواصل معنا</strong>
+                            <p class="mb-0 text-muted">عبر واتساب أو الهاتف</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <span class="step-number">2</span>
+                        <div>
+                            <strong>أرسل المستندات</strong>
+                            <p class="mb-0 text-muted">صورة من الشهادة والرقم الوطني</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <span class="step-number">3</span>
+                        <div>
+                            <strong>ادفع الرسوم</strong>
+                            <p class="mb-0 text-muted">عبر الوسائل المتاحة</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <span class="step-number">4</span>
+                        <div>
+                            <strong>استلم شهادتك</strong>
+                            <p class="mb-0 text-muted">خلال 3-7 أيام عمل</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- بطاقة التواصل -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">📞 تواصل معنا</h5>
+                </div>
+                <div class="card-body text-center">
+                    <i class="bi bi-whatsapp display-1 text-success"></i>
+                    <h5 class="mt-3">اطلب الآن عبر واتساب</h5>
+                    <p class="text-muted">فريقنا جاهز لخدمتك</p>
+
+                    <a href="https://wa.me/{{ whatsapp_number }}?text={{ whatsapp_message|urlencode }}"
+                       target="_blank"
+                       class="btn btn-success btn-lg w-100 mb-3">
+                        <i class="bi bi-whatsapp"></i>
+                        تواصل عبر واتساب
+                    </a>
+
+                    <hr>
+
+                    <div class="text-start">
+                        <p><i class="bi bi-telephone text-primary"></i> <strong>الهاتف:</strong> {{ phone_number }}</p>
+                        <p><i class="bi bi-envelope text-primary"></i> <strong>الإيميل:</strong> {{ email }}</p>
+                        <p><i class="bi bi-geo-alt text-primary"></i> <strong>العنوان:</strong> {{ address }}</p>
+                        <p><i class="bi bi-clock text-primary"></i> <strong>ساعات العمل:</strong> {{ working_hours }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

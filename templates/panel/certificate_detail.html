@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تفاصيل الشهادة - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/panel.css' %}">
+
+<div class="page-hero">
+    <h1>📜 تفاصيل طلب الشهادة</h1>
+    <p>{{ certificate.request_code }}</p>
+</div>
+
+<div class="container py-5">
+
+    <div class="panel-toolbar">
+        <a href="{% url 'panel:certificates' %}" class="btn-outline btn-sm">
+            <i class="fa-solid fa-arrow-right"></i> العودة للقائمة
+        </a>
+        <div>
+            <span class="status-badge status-{{ certificate.status }}" id="statusBadge">
+                {{ certificate.get_status_display }}
+            </span>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+
+        <div class="info-card">
+            <div class="info-card-header">
+                <i class="fa-solid fa-user"></i>
+                <h3>بيانات الطلب</h3>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">رقم الطلب:</div>
+                <div class="value"><code>{{ certificate.request_code }}</code></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">الاسم:</div>
+                <div class="value"><strong>{{ certificate.full_name }}</strong></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">رقم الهاتف:</div>
+                <div class="value">
+                    {{ certificate.phone_number }}
+                    <a href="{{ wa_link }}" target="_blank" class="btn-whatsapp btn-sm" style="display:inline-flex; padding:5px 12px; margin-right:10px; border-radius:6px; color:white; text-decoration:none;">
+                        <i class="fa-brands fa-whatsapp"></i> واتساب
+                    </a>
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">نوع الخدمة:</div>
+                <div class="value">
+                    <span class="type-badge type-bachelor">
+                        {{ certificate.service_display }}
+                    </span>
+                </div>
+            </div>
+
+            {% if certificate.details %}
+            <div class="detail-item">
+                <div class="label">تفاصيل:</div>
+                <div class="value">{{ certificate.details }}</div>
+            </div>
+            {% endif %}
+
+            <div class="detail-item">
+                <div class="label">تاريخ الطلب:</div>
+                <div class="value">{{ certificate.submitted_at|date:"Y-m-d H:i" }}</div>
+            </div>
+
+            {% if certificate.admin_notes %}
+            <div class="detail-item">
+                <div class="label">ملاحظات:</div>
+                <div class="value">{{ certificate.admin_notes }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div>
+            {% if certificate.certificate_file %}
+            <div class="info-card mb-3">
+                <div class="info-card-header">
+                    <i class="fa-solid fa-file"></i>
+                    <h3>صورة الشهادة</h3>
+                </div>
+                <div class="file-preview">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <a href="{{ certificate.certificate_file.url }}" target="_blank">
+                        <i class="fa-solid fa-download"></i> تحميل
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if certificate.national_id_file %}
+            <div class="info-card mb-3">
+                <div class="info-card-header">
+                    <i class="fa-solid fa-id-card"></i>
+                    <h3>الرقم الوطني</h3>
+                </div>
+                <div class="file-preview">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <a href="{{ certificate.national_id_file.url }}" target="_blank">
+                        <i class="fa-solid fa-download"></i> تحميل
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fa-solid fa-edit"></i>
+                    <h3>تغيير الحالة</h3>
+                </div>
+
+                <div class="action-panel">
+                    <button class="action-btn-lg btn-info" onclick="changeStatus('processing')">
+                        <i class="fa-solid fa-gear"></i>
+                        قيد التنفيذ
+                    </button>
+                    <button class="action-btn-lg btn-success" onclick="changeStatus('completed')">
+                        <i class="fa-solid fa-check-circle"></i>
+                        مكتمل
+                    </button>
+                    <button class="action-btn-lg btn-danger" onclick="changeStatus('cancelled')">
+                        <i class="fa-solid fa-times-circle"></i>
+                        ملغي
+                    </button>
+                    <button class="action-btn-lg btn-warning" onclick="changeStatus('pending')">
+                        <i class="fa-solid fa-rotate"></i>
+                        إعادة إلى جديد
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function getCookie(name) {
+    let v = null;
+    if (document.cookie) {
+        const cs = document.cookie.split(';');
+        for (let i = 0; i < cs.length; i++) {
+            const c = cs[i].trim();
+            if (c.substring(0, name.length + 1) === (name + '=')) {
+                v = decodeURIComponent(c.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return v;
+}
+
+function changeStatus(status) {
+    if (!confirm('هل تريد تغيير الحالة؟')) return;
+    const formData = new FormData();
+    formData.append('status', status);
+
+    fetch('{% url "panel:certificate_update_status" certificate.pk %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const badge = document.getElementById('statusBadge');
+            badge.className = 'status-badge status-' + data.new_status;
+            badge.textContent = data.display;
+            alert('✅ تم التحديث: ' + data.display);
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+</script>
+
+{% endblock %}

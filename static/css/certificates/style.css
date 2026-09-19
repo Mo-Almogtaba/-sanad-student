@@ -1,0 +1,315 @@
+/* =========================================================
+ *   صفحة الشهادات والتوثيق - الأنماط
+ *   ========================================================= */
+
+/* ============ شبكة الكروت ============ */
+.cert-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 60px;
+}
+
+.cert-card {
+    background: white;
+    border-radius: 20px;
+    padding: 30px 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    border: 2px solid #f1f5f9;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    min-height: 260px;
+}
+
+.cert-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #1e40af, #3b82f6);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s ease;
+}
+
+.cert-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(30, 64, 175, 0.15);
+    border-color: #3b82f6;
+    color: inherit;
+}
+
+.cert-card:hover::before {
+    transform: scaleX(1);
+}
+
+.cert-card-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    line-height: 1;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+    user-select: none;
+}
+
+.cert-card:hover .cert-card-icon {
+    transform: scale(1.1) rotate(-5deg);
+}
+
+.cert-icon-blue   { background: #dbeafe; color: #1e40af; }
+.cert-icon-green  { background: #d1fae5; color: #059669; }
+.cert-icon-orange { background: #fed7aa; color: #ea580c; }
+.cert-icon-purple { background: #e9d5ff; color: #7c3aed; }
+.cert-icon-red    { background: #fee2e2; color: #dc2626; }
+
+.cert-card h3 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 12px;
+}
+
+.cert-card p {
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+.cert-card-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #1e40af, #1e3a8a);
+    color: white;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    margin-top: auto;
+}
+
+.cert-card:hover .cert-card-btn {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(30, 64, 175, 0.3);
+}
+
+.cert-btn-wa {
+    background: linear-gradient(135deg, #25d366, #128c7e);
+}
+
+.cert-card:hover .cert-btn-wa {
+    box-shadow: 0 6px 15px rgba(37, 211, 102, 0.3);
+}
+
+/* ============ خطوات الطلب ============ */
+.cert-steps-section {
+    margin-top: 40px;
+}
+
+.cert-steps-section h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.cert-step-card {
+    background: white;
+    border-radius: 16px;
+    padding: 25px 20px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    height: 100%;
+    transition: all 0.3s;
+}
+
+.cert-step-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(30, 64, 175, 0.1);
+    border-color: #bfdbfe;
+}
+
+.cert-step-number {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 0 auto 15px;
+    box-shadow: 0 6px 15px rgba(30, 64, 175, 0.25);
+}
+
+.cert-step-card h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.cert-step-card p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* ============ نموذج الطلب ============ */
+.cert-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.cert-form-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+.cert-form-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 25px;
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    color: white;
+}
+
+.cert-form-header i {
+    font-size: 1.3rem;
+}
+
+.cert-form-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.cert-form-body {
+    padding: 25px;
+}
+
+.cert-form-group {
+    margin-bottom: 20px;
+}
+
+.cert-form-group:last-child {
+    margin-bottom: 0;
+}
+
+.cert-form-group label {
+    display: block;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.cert-form-group label .required {
+    color: #dc2626;
+}
+
+.cert-form-group input,
+.cert-form-group select,
+.cert-form-group textarea {
+    width: 100%;
+    padding: 13px 18px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    background: #fafbfc;
+    color: #1e293b;
+    transition: all 0.2s;
+}
+
+.cert-form-group input:focus,
+.cert-form-group select:focus,
+.cert-form-group textarea:focus {
+    outline: none;
+    border-color: #1e40af;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+}
+
+.cert-submit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 18px 30px;
+    background: linear-gradient(135deg, #25d366, #128c7e);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.3);
+}
+
+.cert-submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(37, 211, 102, 0.4);
+}
+
+.cert-submit-btn i {
+    font-size: 1.3rem;
+}
+
+/* ============ Responsive ============ */
+@media (max-width: 768px) {
+    .cert-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .cert-card {
+        padding: 25px 20px;
+        min-height: auto;
+    }
+
+    .cert-card-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.6rem;
+    }
+
+    .cert-card h3 {
+        font-size: 1.05rem;
+    }
+
+    .cert-form-body {
+        padding: 20px;
+    }
+
+    .cert-submit-btn {
+        font-size: 1rem;
+        padding: 16px 25px;
+    }
+}

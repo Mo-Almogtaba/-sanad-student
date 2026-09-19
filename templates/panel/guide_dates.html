@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}المواعيد المهمة - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/panel.css' %}">
+
+<div class="page-hero">
+    <h1>📅 المواعيد المهمة</h1>
+    <p>إجمالي: {{ total }} موعد</p>
+</div>
+
+<div class="container py-5">
+
+    <div class="panel-toolbar">
+        <a href="{% url 'panel:guide_sections' %}" class="btn-outline btn-sm">
+            <i class="fa-solid fa-arrow-right"></i> العودة للأقسام
+        </a>
+        <button class="btn-primary btn-sm" onclick="openAddModal()">
+            <i class="fa-solid fa-plus"></i> موعد جديد
+        </button>
+    </div>
+
+    <!-- الفلاتر -->
+    <div class="filter-card">
+        <form method="get">
+            <div class="filter-row" style="grid-template-columns: 1fr 1fr auto;">
+                <div class="filter-item">
+                    <label>الحالة</label>
+                    <select name="status">
+                        <option value="">الكل</option>
+                        <option value="upcoming" {% if status_filter == 'upcoming' %}selected{% endif %}>قادمة</option>
+                        <option value="past" {% if status_filter == 'past' %}selected{% endif %}>منتهية</option>
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>مفعّلة</option>
+                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>معطّلة</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-primary btn-sm">
+                        <i class="fa-solid fa-search"></i> تطبيق
+                    </button>
+                    <a href="{% url 'panel:guide_dates' %}" class="btn-outline btn-sm">
+                        <i class="fa-solid fa-eraser"></i> مسح
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- القائمة -->
+    <div class="info-card">
+        {% if dates %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>الأيقونة</th>
+                        <th>العنوان</th>
+                        <th>التاريخ</th>
+                        <th>العدّاد</th>
+                        <th>الحالة</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for date in dates %}
+                    <tr id="row-{{ date.pk }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <div style="width:42px; height:42px; border-radius:10px; background:{{ date.color }}; color:white; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                                <i class="fa-solid {{ date.icon }}"></i>
+                            </div>
+                        </td>
+                        <td>
+                            <strong>{{ date.title }}</strong>
+                            {% if date.description %}
+                                <br>
+                                <small class="text-muted">{{ date.description|truncatechars:50 }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ date.date|date:"Y-m-d" }}</strong>
+                            <br>
+                            <small class="text-muted">{{ date.date|date:"H:i" }}</small>
+                        </td>
+                        <td>
+                            {% if date.show_countdown %}
+                                {% if date.is_past %}
+                                    <span class="status-badge status-rejected">انتهى</span>
+                                {% elif date.is_today %}
+                                    <span class="status-badge status-pending">🔔 اليوم!</span>
+                                {% else %}
+                                    <span class="status-badge status-reviewed">
+                                        {{ date.days_remaining }} يوم
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge {% if date.is_active %}status-accepted{% else %}status-rejected{% endif %}">
+                                {% if date.is_active %}✅ مفعّل{% else %}⏸️ معطّل{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="action-btn" onclick="editDate({{ date.pk }})" 
+                                    title="تعديل" style="background:#dbeafe; color:#1e40af;">
+                                <i class="fa-solid fa-edit"></i>
+                            </button>
+                            <button class="action-btn" onclick="toggleDate({{ date.pk }})" 
+                                    title="تفعيل/تعطيل" style="background:#fef3c7; color:#92400e;">
+                                <i class="fa-solid fa-{% if date.is_active %}eye-slash{% else %}eye{% endif %}"></i>
+                            </button>
+                            <button class="action-btn" onclick="deleteDate({{ date.pk }}, '{{ date.title|escapejs }}')" 
+                                    title="حذف" style="background:#fee2e2; color:#991b1b;">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-calendar"></i>
+            <h3>لا توجد مواعيد</h3>
+            <p>ابدأ بإضافة موعد مهم</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="dateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="dateModalTitle">➕ موعد جديد</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="dateForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="date_id" id="date_id">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">العنوان *</label>
+                        <input type="text" name="title" id="date_title" class="form-control" required 
+                               placeholder="مثال: بدء التقديم الإلكتروني">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الوصف</label>
+                        <input type="text" name="description" id="date_description" class="form-control" 
+                               placeholder="وصف مختصر">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">التاريخ والوقت *</label>
+                        <input type="datetime-local" name="date" id="date_date" class="form-control" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">الأيقونة</label>
+                            <input type="text" name="icon" id="date_icon" class="form-control" 
+                                   value="fa-calendar-alt">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">اللون</label>
+                            <input type="color" name="color" id="date_color" class="form-control" 
+                                   value="#dc2626" style="height:45px;">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">الترتيب</label>
+                            <input type="number" name="order" id="date_order" class="form-control" value="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">&nbsp;</label>
+                            <div class="form-check" style="padding-top:10px;">
+                                <input type="checkbox" name="show_countdown" id="date_show_countdown" 
+                                       class="form-check-input" checked>
+                                <label class="form-check-label" for="date_show_countdown">
+                                    إظهار العدّاد التنازلي
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input type="checkbox" name="is_active" id="date_is_active" 
+                               class="form-check-input" checked>
+                        <label class="form-check-label" for="date_is_active">
+                            مفعّل
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary w-100" onclick="saveDate()">
+                    <i class="fa-solid fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function getCookie(name) {
+    let v = null;
+    if (document.cookie) {
+        const cs = document.cookie.split(';');
+        for (let i = 0; i < cs.length; i++) {
+            const c = cs[i].trim();
+            if (c.substring(0, name.length + 1) === (name + '=')) {
+                v = decodeURIComponent(c.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return v;
+}
+
+const datesData = {
+    {% for date in dates %}
+    {{ date.pk }}: {
+        id: {{ date.pk }},
+        title: "{{ date.title|escapejs }}",
+        description: "{{ date.description|escapejs }}",
+        date: "{{ date.date|date:'Y-m-d\TH:i' }}",
+        icon: "{{ date.icon }}",
+        color: "{{ date.color }}",
+        order: {{ date.order }},
+        show_countdown: {{ date.show_countdown|yesno:"true,false" }},
+        is_active: {{ date.is_active|yesno:"true,false" }},
+    },
+    {% endfor %}
+};
+
+function openAddModal() {
+    document.getElementById('dateForm').reset();
+    document.getElementById('date_id').value = '';
+    document.getElementById('dateModalTitle').textContent = '➕ موعد جديد';
+    new bootstrap.Modal(document.getElementById('dateModal')).show();
+}
+
+function editDate(id) {
+    const data = datesData[id];
+    if (!data) return;
+
+    document.getElementById('date_id').value = data.id;
+    document.getElementById('date_title').value = data.title;
+    document.getElementById('date_description').value = data.description;
+    document.getElementById('date_date').value = data.date;
+    document.getElementById('date_icon').value = data.icon;
+    document.getElementById('date_color').value = data.color;
+    document.getElementById('date_order').value = data.order;
+    document.getElementById('date_show_countdown').checked = data.show_countdown;
+    document.getElementById('date_is_active').checked = data.is_active;
+    document.getElementById('dateModalTitle').textContent = '✏️ تعديل الموعد';
+
+    new bootstrap.Modal(document.getElementById('dateModal')).show();
+}
+
+function saveDate() {
+    const dateId = document.getElementById('date_id').value;
+    const form = document.getElementById('dateForm');
+    const formData = new FormData(form);
+
+    let url = '{% url "panel:guide_date_create" %}';
+    if (dateId) {
+        url = `/panel/guide/dates/${dateId}/update/`;
+    }
+
+    fetch(url, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ تم الحفظ');
+            location.reload();
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+
+function toggleDate(pk) {
+    fetch(`/panel/guide/dates/${pk}/toggle/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) location.reload();
+    })
+    .catch(() => alert('❌ خطأ'));
+}
+
+function deleteDate(pk, title) {
+    if (!confirm(`هل أنت متأكد من حذف "${title}"؟`)) return;
+
+    fetch(`/panel/guide/dates/${pk}/delete/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`row-${pk}`).remove();
+            alert('✅ تم الحذف');
+        }
+    })
+    .catch(() => alert('❌ خطأ'));
+}
+</script>
+
+{% endblock %}

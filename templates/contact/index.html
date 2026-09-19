@@ -1,0 +1,406 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}اتصل بنا - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<div class="page-hero">
+    <h1>📞 اتصل بنا</h1>
+    <p>نحن هنا للإجابة على استفساراتك</p>
+</div>
+
+<div class="container py-5">
+
+    <!-- 1. نبذة عن المنصة -->
+    <div class="info-card mb-5">
+        <div class="info-card-header">
+            <i class="fa-solid fa-circle-info"></i>
+            <h3>🎓 عن المنصة</h3>
+        </div>
+        <p style="font-size:1.05rem; line-height:1.9;">
+            {{ SITE_ABOUT_US|default:"منصة سودانية متكاملة تهدف إلى تسهيل رحلة الطالب الأكاديمية من التقديم للجامعات حتى استخراج الشهادات." }}
+        </p>
+    </div>
+
+    <!-- 2. من نحن + تواصل معنا -->
+    <div class="row g-4 mb-5">
+        <!-- من نحن -->
+        <div class="col-lg-6">
+            <div class="info-card h-100">
+                <div class="info-card-header">
+                    <i class="fa-solid fa-users"></i>
+                    <h3>👥 من نحن</h3>
+                </div>
+                <p>
+                    نحن فريق سوداني متخصص في تقديم الخدمات الأكاديمية للطلاب،
+                    نهدف إلى تسهيل الوصول للجامعات والمنح وكل ما يحتاجه الطالب.
+                </p>
+                <ul class="list-unstyled mt-3">
+                    <li class="mb-2">
+                        <i class="fa-solid fa-check-circle text-success"></i>
+                        خبرة في المجال الأكاديمي
+                    </li>
+                    <li class="mb-2">
+                        <i class="fa-solid fa-check-circle text-success"></i>
+                        فريق دعم متاح دائماً
+                    </li>
+                    <li class="mb-2">
+                        <i class="fa-solid fa-check-circle text-success"></i>
+                        خدمات موثوقة وسريعة
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- تواصل معنا -->
+        <div class="col-lg-6">
+            <div class="info-card h-100">
+                <div class="info-card-header">
+                    <i class="fa-solid fa-address-book"></i>
+                    <h3>📱 تواصل معنا</h3>
+                </div>
+
+                <div class="mb-3">
+                    <p class="mb-2">
+                        <i class="fa-brands fa-whatsapp text-success fa-lg"></i>
+                        <strong> واتساب:</strong>
+                        <a href="https://wa.me/{{ SITE_WHATSAPP }}" target="_blank" 
+                           style="color:#1e40af;">
+                            {{ SITE_PHONE }}
+                        </a>
+                    </p>
+                    <p class="mb-2">
+                        <i class="fa-solid fa-envelope text-primary fa-lg"></i>
+                        <strong> البريد:</strong>
+                        <a href="mailto:{{ SITE_EMAIL }}" style="color:#1e40af;">
+                            {{ SITE_EMAIL }}
+                        </a>
+                    </p>
+                    <p class="mb-2">
+                        <i class="fa-solid fa-location-dot text-danger fa-lg"></i>
+                        <strong> العنوان:</strong> {{ SITE_ADDRESS }}
+                    </p>
+                    <p class="mb-2">
+                        <i class="fa-solid fa-clock text-warning fa-lg"></i>
+                        <strong> ساعات العمل:</strong> السبت - الخميس: 8 ص - 4 م
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. روابط التواصل الاجتماعي -->
+    <div class="info-card mb-5">
+        <div class="info-card-header">
+            <i class="fa-solid fa-share-nodes"></i>
+            <h3>🌐 تابعنا على منصات التواصل</h3>
+        </div>
+
+        <div class="row g-3">
+            {% if SITE_FACEBOOK_PAGE %}
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ SITE_FACEBOOK_PAGE }}" target="_blank" 
+                   class="social-link facebook">
+                    <i class="fa-brands fa-facebook"></i>
+                    <div>
+                        <strong>صفحة فيسبوك</strong>
+                        <small>تابع آخر الأخبار</small>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+
+            {% if SITE_FACEBOOK_GROUP %}
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ SITE_FACEBOOK_GROUP }}" target="_blank" 
+                   class="social-link facebook">
+                    <i class="fa-brands fa-facebook-messenger"></i>
+                    <div>
+                        <strong>مجموعة فيسبوك</strong>
+                        <small>نقاشات الطلاب</small>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+
+            {% if SITE_TELEGRAM_CHANNEL %}
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ SITE_TELEGRAM_CHANNEL }}" target="_blank" 
+                   class="social-link telegram">
+                    <i class="fa-brands fa-telegram"></i>
+                    <div>
+                        <strong>قناة تيليجرام</strong>
+                        <small>تحديثات فورية</small>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+
+            {% if SITE_TELEGRAM_GROUP %}
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ SITE_TELEGRAM_GROUP }}" target="_blank" 
+                   class="social-link telegram">
+                    <i class="fa-brands fa-telegram"></i>
+                    <div>
+                        <strong>مجموعة تيليجرام</strong>
+                        <small>مجتمع الطلاب</small>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+
+            {% if SITE_INSTAGRAM %}
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ SITE_INSTAGRAM }}" target="_blank" 
+                   class="social-link instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                    <div>
+                        <strong>إنستغرام</strong>
+                        <small>قصص وصور</small>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+
+            {% if SITE_YOUTUBE %}
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ SITE_YOUTUBE }}" target="_blank" 
+                   class="social-link youtube">
+                    <i class="fa-brands fa-youtube"></i>
+                    <div>
+                        <strong>يوتيوب</strong>
+                        <small>شروحات الفيديو</small>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+
+            {% if SITE_TIKTOK %}
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ SITE_TIKTOK }}" target="_blank" 
+                   class="social-link tiktok">
+                    <i class="fa-brands fa-tiktok"></i>
+                    <div>
+                        <strong>تيك توك</strong>
+                        <small>محتوى سريع</small>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+
+            {% if SITE_TWITTER %}
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ SITE_TWITTER }}" target="_blank" 
+                   class="social-link twitter">
+                    <i class="fa-brands fa-x-twitter"></i>
+                    <div>
+                        <strong>X (تويتر)</strong>
+                        <small>آخر التحديثات</small>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 4. نموذج الاتصال -->
+    <div class="info-card mb-5">
+        <div class="info-card-header">
+            <i class="fa-solid fa-paper-plane"></i>
+            <h3>✉️ أرسل لنا رسالة</h3>
+        </div>
+
+        {% if errors %}
+            <div class="alert alert-danger">
+                <h5>⚠️ تنبيهات:</h5>
+                <ul class="mb-0">
+                    {% for err in errors %}
+                        <li>{{ err }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" class="custom-form">
+            {% csrf_token %}
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>الاسم الكامل <span class="required">*</span></label>
+                        <input type="text" name="full_name"
+                               value="{{ form_data.full_name|default:'' }}"
+                               placeholder="الاسم الكامل" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>رقم الهاتف (واتساب) <span class="required">*</span></label>
+                        <input type="tel" name="phone_number"
+                               value="{{ form_data.phone_number|default:'' }}"
+                               placeholder="+249xxxxxxxxx" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>نوع الخدمة <span class="required">*</span></label>
+                        <select name="service_type" required>
+                            <option value="">اختر الخدمة...</option>
+                            {% for code, name in service_types %}
+                                <option value="{{ code }}"
+                                    {% if form_data.service_type == code %}selected{% endif %}>
+                                    {{ name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>نطاق الاستفسار <span class="required">*</span></label>
+                        <select name="scope" required>
+                            <option value="inquiry" 
+                                {% if form_data.scope == 'inquiry' %}selected{% endif %}>
+                                استفسار عن خدمة
+                            </option>
+                            <option value="complaint"
+                                {% if form_data.scope == 'complaint' %}selected{% endif %}>
+                                شكوى
+                            </option>
+                            <option value="suggestion"
+                                {% if form_data.scope == 'suggestion' %}selected{% endif %}>
+                                اقتراح
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>الرسالة <span class="required">*</span></label>
+                <textarea name="message" rows="5" required
+                          placeholder="اكتب رسالتك هنا..."
+                          >{{ form_data.message|default:'' }}</textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                <i class="fa-solid fa-paper-plane"></i>
+                إرسال الرسالة
+            </button>
+        </form>
+    </div>
+
+    <!-- 5. معلومات المطور -->
+    {% if DEV_NAME %}
+    <div class="info-card">
+        <div class="info-card-header">
+            <i class="fa-solid fa-code"></i>
+            <h3>👨‍💻 معلومات المطور</h3>
+        </div>
+
+        <div class="text-center">
+            <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg, #1e40af, #3b82f6); color:white; display:flex; align-items:center; justify-content:center; font-size:2rem; margin:0 auto 15px;">
+                <i class="fa-solid fa-user-tie"></i>
+            </div>
+            <h4>{{ DEV_NAME }}</h4>
+            {% if DEV_DESCRIPTION %}
+                <p class="text-muted">{{ DEV_DESCRIPTION }}</p>
+            {% endif %}
+
+            <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
+                {% if DEV_WHATSAPP %}
+                <a href="https://wa.me/{{ DEV_WHATSAPP }}" target="_blank" 
+                   class="btn btn-success btn-sm">
+                    <i class="fa-brands fa-whatsapp"></i> واتساب
+                </a>
+                {% endif %}
+                {% if DEV_EMAIL %}
+                <a href="mailto:{{ DEV_EMAIL }}" class="btn btn-primary btn-sm">
+                    <i class="fa-solid fa-envelope"></i> البريد
+                </a>
+                {% endif %}
+                {% if DEV_GITHUB %}
+                <a href="{{ DEV_GITHUB }}" target="_blank" class="btn btn-dark btn-sm">
+                    <i class="fa-brands fa-github"></i> GitHub
+                </a>
+                {% endif %}
+                {% if DEV_WEBSITE %}
+                <a href="{{ DEV_WEBSITE }}" target="_blank" class="btn btn-info btn-sm text-white">
+                    <i class="fa-solid fa-globe"></i> الموقع
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+/* ============ Social Links ============ */
+.social-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    background: white;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #1e293b;
+    transition: all 0.3s ease;
+    border: 2px solid #f1f5f9;
+}
+
+.social-link:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    color: #1e293b;
+}
+
+.social-link i {
+    font-size: 1.8rem;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.social-link strong {
+    display: block;
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+.social-link small {
+    color: #64748b;
+    font-size: 0.8rem;
+}
+
+/* ألوان مخصصة */
+.social-link.facebook i { background:#1877f2; color:white; }
+.social-link.telegram i { background:#0088cc; color:white; }
+.social-link.instagram i { background:linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color:white; }
+.social-link.youtube i { background:#ff0000; color:white; }
+.social-link.tiktok i { background:#000000; color:white; }
+.social-link.twitter i { background:#000000; color:white; }
+</style>
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تفاصيل الرسالة - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/panel.css' %}">
+
+<div class="page-hero">
+    <h1>💬 تفاصيل الرسالة</h1>
+    <p>{{ message.message_code }}</p>
+</div>
+
+<div class="container py-5">
+
+    <div class="panel-toolbar">
+        <a href="{% url 'panel:contact' %}" class="btn-outline btn-sm">
+            <i class="fa-solid fa-arrow-right"></i> العودة للقائمة
+        </a>
+        <div>
+            <span class="status-badge status-{{ message.status }}" id="statusBadge">
+                {{ message.get_status_display }}
+            </span>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+
+        <div class="info-card">
+            <div class="info-card-header">
+                <i class="fa-solid fa-envelope-open-text"></i>
+                <h3>الرسالة</h3>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">رقم الرسالة:</div>
+                <div class="value"><code>{{ message.message_code }}</code></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">الاسم:</div>
+                <div class="value"><strong>{{ message.full_name }}</strong></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">رقم الهاتف:</div>
+                <div class="value">
+                    {{ message.phone_number }}
+                    <a href="{{ wa_link }}" target="_blank" class="btn-whatsapp btn-sm" style="display:inline-flex; padding:5px 12px; margin-right:10px; border-radius:6px; color:white; text-decoration:none;">
+                        <i class="fa-brands fa-whatsapp"></i> واتساب
+                    </a>
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">الخدمة:</div>
+                <div class="value">{{ message.service_display }}</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">النطاق:</div>
+                <div class="value">
+                    {% if message.scope == 'complaint' %}
+                        <span class="status-badge status-rejected">شكوى</span>
+                    {% elif message.scope == 'suggestion' %}
+                        <span class="status-badge status-accepted">اقتراح</span>
+                    {% else %}
+                        <span class="status-badge status-reviewed">استفسار</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="label">التاريخ:</div>
+                <div class="value">{{ message.submitted_at|date:"Y-m-d H:i" }}</div>
+            </div>
+
+            <div class="detail-item" style="flex-direction:column; align-items:stretch;">
+                <div class="label" style="margin-bottom:8px;">الرسالة:</div>
+                <div class="value" style="background:#f8fafc; padding:15px; border-radius:10px; border:1px solid #e5e7eb;">
+                    {{ message.message|linebreaks }}
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fa-solid fa-edit"></i>
+                    <h3>تغيير الحالة</h3>
+                </div>
+
+                <div class="action-panel">
+                    <button class="action-btn-lg btn-info" onclick="changeStatus('read')">
+                        <i class="fa-solid fa-eye"></i>
+                        تم القراءة
+                    </button>
+                    <button class="action-btn-lg btn-success" onclick="changeStatus('replied')">
+                        <i class="fa-solid fa-reply"></i>
+                        تم الرد
+                    </button>
+                    <button class="action-btn-lg btn-warning" onclick="changeStatus('archived')">
+                        <i class="fa-solid fa-box-archive"></i>
+                        أرشفة
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function getCookie(name) {
+    let v = null;
+    if (document.cookie) {
+        const cs = document.cookie.split(';');
+        for (let i = 0; i < cs.length; i++) {
+            const c = cs[i].trim();
+            if (c.substring(0, name.length + 1) === (name + '=')) {
+                v = decodeURIComponent(c.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return v;
+}
+
+function changeStatus(status) {
+    if (!confirm('هل تريد تغيير الحالة؟')) return;
+    const formData = new FormData();
+    formData.append('status', status);
+
+    fetch('{% url "panel:contact_update_status" message.pk %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const badge = document.getElementById('statusBadge');
+            badge.className = 'status-badge status-' + data.new_status;
+            badge.textContent = data.display;
+            alert('✅ تم التحديث: ' + data.display);
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+</script>
+
+{% endblock %}

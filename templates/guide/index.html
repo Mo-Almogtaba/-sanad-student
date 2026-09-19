@@ -1,0 +1,406 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/guide.css' %}">
+
+<!-- شريط تقدم القراءة -->
+<div class="reading-progress" id="readingProgress"></div>
+
+<!-- Hero -->
+<div class="guide-hero">
+    <div class="guide-hero-content">
+        <div class="guide-hero-badge">
+            <i class="fa-solid fa-book-open"></i>
+            دليل شامل ومحدّث
+        </div>
+        <h1>{{ page_title }}</h1>
+        <p>كل ما تحتاج معرفته للتقديم على الجامعات السودانية بنفسك — خطوات، شروط، روابط، وأسئلة شائعة.</p>
+
+        <div class="guide-meta">
+            {% if latest_update %}
+            <span>
+                <i class="fa-solid fa-clock"></i>
+                آخر تحديث: {{ latest_update|date:"Y-m-d" }}
+            </span>
+            {% endif %}
+            <span>
+                <i class="fa-solid fa-list"></i>
+                {{ total_sections }} أقسام
+            </span>
+            <span>
+                <i class="fa-solid fa-hourglass-half"></i>
+                وقت القراءة: ~10 دقائق
+            </span>
+        </div>
+
+        <div class="guide-hero-actions">
+            <button class="btn-print" onclick="window.print()">
+                <i class="fa-solid fa-print"></i>
+                طباعة الدليل
+            </button>
+            <button class="btn-share" onclick="shareGuide()">
+                <i class="fa-solid fa-share-nodes"></i>
+                مشاركة
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- شريط البحث -->
+<div class="guide-search-bar">
+    <div class="guide-search-container">
+        <i class="fa-solid fa-search"></i>
+        <input type="text" id="guideSearch" 
+               placeholder="ابحث في الدليل...">
+        <button class="search-clear" onclick="clearSearch()">
+            <i class="fa-solid fa-times"></i>
+        </button>
+    </div>
+    <div id="searchResults" class="search-results"></div>
+</div>
+
+<div class="container py-5 guide-container">
+
+    <!-- المواعيد المهمة (مع عداد تنازلي) -->
+    {% if important_dates %}
+    <section class="important-dates-section">
+        <div class="section-header-guide">
+            <h2>
+                <i class="fa-solid fa-calendar-check"></i>
+                المواعيد المهمة
+            </h2>
+            <p>مواعيد التقديم والقبول</p>
+        </div>
+
+        <div class="dates-grid">
+            {% for date in important_dates %}
+            <div class="date-card" style="--card-color: {{ date.color }};">
+                <div class="date-icon">
+                    <i class="fa-solid {{ date.icon }}"></i>
+                </div>
+                <div class="date-content">
+                    <h3>{{ date.title }}</h3>
+                    {% if date.description %}
+                        <p>{{ date.description }}</p>
+                    {% endif %}
+                    <div class="date-info">
+                        <i class="fa-solid fa-calendar"></i>
+                        {{ date.date|date:"Y-m-d" }}
+                    </div>
+                </div>
+                {% if date.show_countdown %}
+                    {% if date.is_today %}
+                        <div class="countdown-badge countdown-today">
+                            <i class="fa-solid fa-bell"></i>
+                            اليوم!
+                        </div>
+                    {% elif date.is_past %}
+                        <div class="countdown-badge countdown-past">
+                            انتهى
+                        </div>
+                    {% else %}
+                        <div class="countdown-badge"
+                             data-countdown="{{ date.date|date:'c' }}"
+                             data-days="{{ date.days_remaining }}">
+                            <span class="countdown-number">{{ date.days_remaining }}</span>
+                            <span class="countdown-label">يوم</span>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- أهم 3 نصائح (صندوق بارز) -->
+    <section class="quick-tips-box">
+        <div class="quick-tips-header">
+            <i class="fa-solid fa-star"></i>
+            <h3>أهم 3 نصائح قبل البدء</h3>
+        </div>
+        <div class="quick-tips-grid">
+            <div class="quick-tip">
+                <div class="tip-number">1</div>
+                <div>
+                    <strong>احفظ رقم طلبك</strong>
+                    <p>بعد إرسال الطلب، احفظ رقم الطلب ورابط التحقق.</p>
+                </div>
+            </div>
+            <div class="quick-tip">
+                <div class="tip-number">2</div>
+                <div>
+                    <strong>تأكد من بياناتك</strong>
+                    <p>راجع بياناتك قبل الإرسال — لا يمكن التعديل بعد التأكيد.</p>
+                </div>
+            </div>
+            <div class="quick-tip">
+                <div class="tip-number">3</div>
+                <div>
+                    <strong>لا تستعجل</strong>
+                    <p>اختر رغباتك بعناية — رتبها حسب أولوياتك الحقيقية.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- الأقسام -->
+    {% for section in sections %}
+    <section class="guide-section" data-section-id="{{ section.pk }}">
+        <div class="section-header-guide" style="--section-color: {{ section.color }};">
+            <div class="section-icon" style="background: {{ section.color }};">
+                <i class="fa-solid {{ section.icon }}"></i>
+            </div>
+            <div>
+                <h2>{{ section.title }}</h2>
+                {% if section.description %}
+                    <p>{{ section.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="section-cards">
+            {% for card in section.cards.all %}
+                {% if card.is_active %}
+
+                <!-- ============ كرت Accordion ============ -->
+                {% if card.card_type == 'accordion' %}
+                <div class="guide-card accordion-card {% if card.is_open_default %}open{% endif %}"
+                     data-searchable="{{ card.title|lower }} {{ card.subtitle|lower }} {{ card.content|striptags|lower }}">
+
+                    <button class="card-header" onclick="toggleCard(this)">
+                        <div class="card-title">
+                            {% if card.icon %}
+                                <i class="fa-solid {{ card.icon }}"></i>
+                            {% endif %}
+                            <div>
+                                <strong>{{ card.title }}</strong>
+                                {% if card.subtitle %}
+                                    <small>{{ card.subtitle }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-down card-arrow"></i>
+                    </button>
+
+                    <div class="card-body">
+                        {% if card.content %}
+                            <div class="card-content">
+                                {{ card.content|safe }}
+                            </div>
+                        {% endif %}
+
+                        <!-- عناصر القائمة -->
+                        {% if card.items.all %}
+                        <ul class="card-list">
+                            {% for item in card.items.all %}
+                            <li>
+                                <i class="fa-solid {{ item.icon }}"
+                                   style="color: {{ item.icon_color }};"></i>
+                                <span>{{ item.text }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+
+                        <!-- الصور -->
+                        {% if card.images.all %}
+                        <div class="card-images">
+                            {% for img in card.images.all %}
+                            <figure class="card-image">
+                                <img src="{{ img.image.url }}" alt="{{ img.caption }}" loading="lazy">
+                                {% if img.caption %}
+                                    <figcaption>{{ img.caption }}</figcaption>
+                                {% endif %}
+                            </figure>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- الروابط -->
+                        {% if card.links.all %}
+                        <div class="card-links">
+                            {% for link in card.links.all %}
+                            <a href="{{ link.url }}" target="_blank" rel="noopener" class="card-link">
+                                <i class="fa-solid {{ link.icon }}"></i>
+                                <div>
+                                    <strong>{{ link.title }}</strong>
+                                    {% if link.description %}
+                                        <small>{{ link.description }}</small>
+                                    {% endif %}
+                                </div>
+                                <i class="fa-solid fa-external-link-alt"></i>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- الفيديو -->
+                        {% if card.videos.all %}
+                        <div class="card-videos">
+                            {% for video in card.videos.all %}
+                                {% if video.is_active and video.embed_url %}
+                                <div class="card-video">
+                                    <h4>{{ video.title }}</h4>
+                                    <div class="video-wrapper">
+                                        <iframe src="{{ video.embed_url }}"
+                                                frameborder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowfullscreen
+                                                loading="lazy"></iframe>
+                                    </div>
+                                    {% if video.description %}
+                                        <p>{{ video.description }}</p>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- ============ كرت قائمة ============ -->
+                {% elif card.card_type == 'list' %}
+                <div class="guide-card list-card"
+                     data-searchable="{{ card.title|lower }} {{ card.subtitle|lower }}">
+                    <div class="list-header">
+                        {% if card.icon %}
+                            <i class="fa-solid {{ card.icon }}"></i>
+                        {% endif %}
+                        <h3>{{ card.title }}</h3>
+                    </div>
+                    {% if card.subtitle %}
+                        <p class="list-subtitle">{{ card.subtitle }}</p>
+                    {% endif %}
+
+                    {% if card.items.all %}
+                    <ul class="card-list">
+                        {% for item in card.items.all %}
+                        <li>
+                            <i class="fa-solid {{ item.icon }}"
+                               style="color: {{ item.icon_color }};"></i>
+                            <span>{{ item.text }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+
+                    {% if card.content %}
+                        <div class="card-content">{{ card.content|safe }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- ============ كرت روابط ============ -->
+                {% elif card.card_type == 'links' %}
+                <div class="guide-card links-card"
+                     data-searchable="{{ card.title|lower }}">
+                    <div class="list-header">
+                        {% if card.icon %}
+                            <i class="fa-solid {{ card.icon }}"></i>
+                        {% endif %}
+                        <h3>{{ card.title }}</h3>
+                    </div>
+
+                    <div class="card-links">
+                        {% for link in card.links.all %}
+                        <a href="{{ link.url }}" target="_blank" rel="noopener" class="card-link">
+                            <i class="fa-solid {{ link.icon }}"></i>
+                            <div>
+                                <strong>{{ link.title }}</strong>
+                                {% if link.description %}
+                                    <small>{{ link.description }}</small>
+                                {% endif %}
+                            </div>
+                            <i class="fa-solid fa-external-link-alt"></i>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- ============ كرت نص حر ============ -->
+                {% elif card.card_type == 'text' %}
+                <div class="guide-card text-card"
+                     data-searchable="{{ card.title|lower }} {{ card.content|striptags|lower }}">
+                    <div class="list-header">
+                        {% if card.icon %}
+                            <i class="fa-solid {{ card.icon }}"></i>
+                        {% endif %}
+                        <h3>{{ card.title }}</h3>
+                    </div>
+                    {% if card.content %}
+                        <div class="card-content">{{ card.content|safe }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+    {% empty %}
+    <div class="empty-guide">
+        <i class="fa-solid fa-book-open fa-4x"></i>
+        <h3>الدليل قيد الإعداد</h3>
+        <p>سيتم إضافة المحتوى قريباً</p>
+    </div>
+    {% endfor %}
+
+    <!-- الفيديوهات -->
+    {% if videos %}
+    <section class="guide-section videos-section">
+        <div class="section-header-guide" style="--section-color: #dc2626;">
+            <div class="section-icon" style="background: #dc2626;">
+                <i class="fa-solid fa-video"></i>
+            </div>
+            <div>
+                <h2>فيديوهات توضيحية</h2>
+                <p>شروحات مرئية خطوة بخطوة</p>
+            </div>
+        </div>
+
+        <div class="videos-grid">
+            {% for video in videos %}
+            <div class="video-card" data-searchable="{{ video.title|lower }}">
+                <div class="video-wrapper">
+                    <iframe src="{{ video.embed_url }}"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                            loading="lazy"></iframe>
+                </div>
+                <div class="video-info">
+                    <h4>{{ video.title }}</h4>
+                    {% if video.description %}
+                        <p>{{ video.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- زر العودة للأعلى -->
+    <button class="back-to-top" id="backToTop" onclick="scrollToTop()">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+</div>
+
+<!-- زر واتساب عائم -->
+<a href="https://wa.me/{{ SITE_WHATSAPP|default:'249123456789' }}?text={{ 'السلام عليكم، لدي استفسار حول دليل التقديم'|urlencode }}"
+   target="_blank" class="floating-whatsapp">
+    <i class="fa-brands fa-whatsapp"></i>
+    <span>استفسار؟</span>
+</a>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/guide.js' %}"></script>
+{% endblock %}

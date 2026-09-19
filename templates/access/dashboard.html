@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}لوحة تحكم الأكواد - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<div class="page-hero">
+    <h1>🎛️ لوحة تحكم الأكواد</h1>
+    <p>إدارة طلبات الاشتراك وأكواد الوصول</p>
+</div>
+
+<div class="container py-5">
+
+    <!-- الإحصائيات -->
+    <div class="stats-grid mb-4">
+        <div class="stat-card bg-high">
+            <div class="number">{{ stats.pending_count }}</div>
+            <div class="label">طلبات جديدة</div>
+        </div>
+        <div class="stat-card bg-good">
+            <div class="number">{{ stats.active_count }}</div>
+            <div class="label">أكواد نشطة</div>
+        </div>
+        <div class="stat-card bg-low">
+            <div class="number">{{ stats.total }}</div>
+            <div class="label">إجمالي الطلبات</div>
+        </div>
+    </div>
+
+    <!-- الطلبات المعلقة -->
+    <div class="info-card mb-4">
+        <div class="info-card-header">
+            <i class="fa-solid fa-inbox"></i>
+            <h3>📥 الطلبات المعلقة ({{ stats.pending_count }})</h3>
+        </div>
+
+        {% if pending %}
+            <div id="pendingList">
+                {% for req in pending %}
+                    <div class="selected-item" id="req-{{ req.pk }}" style="padding:15px;">
+                        <div class="info" style="flex:1;">
+                            <h6>
+                                <strong>{{ req.request_code }}</strong> - {{ req.full_name }}
+                            </h6>
+                            <small>
+                                <i class="fa-solid fa-phone"></i> {{ req.phone_number }}
+                                | <i class="fa-solid fa-clock"></i> 
+                                {{ req.created_at|timesince }} مضت
+                            </small>
+                        </div>
+                        <div>
+                            <button class="btn btn-success btn-sm" onclick="approveRequest({{ req.pk }})">
+                                <i class="fa-solid fa-check"></i> موافقة
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="rejectRequest({{ req.pk }})">
+                                <i class="fa-solid fa-times"></i> رفض
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center text-muted py-4">
+                <i class="fa-solid fa-check-circle fa-2x"></i><br>
+                لا توجد طلبات جديدة
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- الأكواد النشطة -->
+    <div class="info-card">
+        <div class="info-card-header">
+            <i class="fa-solid fa-key"></i>
+            <h3>🔑 آخر الأكواد النشطة</h3>
+        </div>
+
+        {% if active %}
+            <div style="overflow-x:auto;">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>الكود</th>
+                            <th>العميل</th>
+                            <th>الرقم</th>
+                            <th>الاستخدام</th>
+                            <th>ينتهي</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for code in active %}
+                            <tr>
+                                <td><code style="font-size:0.85rem;">{{ code.code }}</code></td>
+                                <td>{{ code.full_name }}</td>
+                                <td>{{ code.phone_number }}</td>
+                                <td>
+                                    <span class="badge" style="background:#28a745;">
+                                        {{ code.current_uses }}/{{ code.max_uses }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if code.expires_at %}
+                                        {{ code.expires_at|date:"Y-m-d" }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-center text-muted py-4">لا توجد أكواد نشطة بعد</p>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function approveRequest(pk) {
+    if (!confirm('هل تريد الموافقة على هذا الطلب وإنشاء كود؟')) return;
+
+    fetch(`/access/approve/${pk}/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            // فتح واتساب لإرسال الكود
+            window.open(data.wa_link, '_blank');
+            
+            // إزالة الطلب من القائمة
+            document.getElementById(`req-${pk}`).remove();
+            
+            alert(`✅ تم إنشاء الكود: ${data.code}\nسيتم فتح واتساب لإرساله للعميل`);
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ حدث خطأ'));
+}
+
+function rejectRequest(pk) {
+    if (!confirm('هل أنت متأكد من رفض هذا الطلب؟')) return;
+
+    fetch(`/access/reject/${pk}/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`req-${pk}`).remove();
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ حدث خطأ'));
+}
+</script>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}الشهادات والتوثيق - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/certificates/style.css' %}">
+
+<div class="page-hero">
+    <h1>📜 الشهادات والتوثيق</h1>
+    <p>خدمات متكاملة لاستخراج الشهادات وتوثيقها وترجمتها</p>
+</div>
+
+<div class="container py-5">
+
+    <!-- ============ الخدمات ============ -->
+    <div class="cert-cards-grid">
+
+        <!-- 1. استخراج شهادة الأساس -->
+        <a href="{% url 'certificates:request_form' 'basic' %}" class="cert-card">
+            <div class="cert-card-icon cert-icon-blue">
+                📖
+            </div>
+            <h3>🎓 استخراج شهادة الأساس</h3>
+            <p>استخراج شهادة مرحلة الأساس للطلاب.</p>
+            <span class="cert-card-btn">
+                📝 تقديم الطلب
+            </span>
+        </a>
+
+        <!-- 2. استخراج الشهادة السودانية -->
+        <a href="{% url 'certificates:request_form' 'high_school' %}" class="cert-card">
+            <div class="cert-card-icon cert-icon-green">
+                ✅
+            </div>
+            <h3>🎓 استخراج الشهادة السودانية</h3>
+            <p>استخراج شهادة الثانوية العامة السودانية.</p>
+            <span class="cert-card-btn">
+                📝 تقديم الطلب
+            </span>
+        </a>
+
+        <!-- 3. استخراج الشهادة الجامعية -->
+        <a href="{% url 'certificates:request_form' 'university' %}" class="cert-card">
+            <div class="cert-card-icon cert-icon-orange">
+                🎓
+            </div>
+            <h3>🎓 استخراج الشهادة الجامعية</h3>
+            <p>استخراج شهادة التخرج من الجامعة.</p>
+            <span class="cert-card-btn">
+                📝 تقديم الطلب
+            </span>
+        </a>
+
+        <!-- 4. توثيق الشهادات -->
+        <a href="https://wa.me/{{ SITE_WHATSAPP|default:'249123456789' }}?text={{ 'السلام عليكم، أرغب في توثيق الشهادات'|urlencode }}"
+           target="_blank" class="cert-card">
+            <div class="cert-card-icon cert-icon-purple">
+                📮
+            </div>
+            <h3>📜 توثيق الشهادات</h3>
+            <p>توثيق الشهادات من الجهات المختصة: المحكمة، الخارجية.</p>
+            <span class="cert-card-btn cert-btn-wa">
+                💬 تواصل مباشر
+            </span>
+        </a>
+
+        <!-- 5. خدمات أخرى -->
+        <a href="https://wa.me/{{ SITE_WHATSAPP|default:'249123456789' }}?text={{ 'السلام عليكم، أرغب في الاستفسار عن الخدمات الأخرى'|urlencode }}"
+           target="_blank" class="cert-card">
+            <div class="cert-card-icon cert-icon-red">
+                📋
+            </div>
+            <h3>📋 خدمات أخرى</h3>
+            <p>تحويل القسائم، توثيق الأرقام الوطنية، ترجمة مستندات، إرسال المستندات داخل وخارج السودان.</p>
+            <span class="cert-card-btn cert-btn-wa">
+                💬 تواصل مباشر
+            </span>
+        </a>
+
+    </div>
+
+    <!-- ============ خطوات الطلب ============ -->
+    <div class="cert-steps-section">
+        <h2 class="text-center mb-4">📋 خطوات الطلب</h2>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="cert-step-card">
+                    <div class="cert-step-number">1</div>
+                    <h4>اختر الخدمة</h4>
+                    <p>اضغط على الخدمة المطلوبة</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="cert-step-card">
+                    <div class="cert-step-number">2</div>
+                    <h4>املأ النموذج</h4>
+                    <p>أدخل بياناتك المطلوبة</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="cert-step-card">
+                    <div class="cert-step-number">3</div>
+                    <h4>تواصل معنا</h4>
+                    <p>يُفتح واتساب تلقائياً</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="cert-step-card">
+                    <div class="cert-step-number">4</div>
+                    <h4>استلم طلبك</h4>
+                    <p>خلال 3-7 أيام عمل</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

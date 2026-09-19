@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}أكواد الوصول - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/panel.css' %}">
+
+<div class="page-hero">
+    <h1>🔑 أكواد الوصول</h1>
+    <p>إجمالي: {{ total }} كود</p>
+</div>
+
+<div class="container py-5">
+
+    <div class="panel-toolbar">
+        <a href="{% url 'panel:dashboard' %}" class="btn-outline btn-sm">
+            <i class="fa-solid fa-arrow-right"></i> العودة
+        </a>
+    </div>
+
+    <!-- الفلاتر -->
+    <div class="filter-card">
+        <form method="get">
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label>🔍 بحث</label>
+                    <input type="text" name="q" value="{{ search }}" 
+                           placeholder="الكود، الاسم، الرقم...">
+                </div>
+
+                <div class="filter-item">
+                    <label>الحالة</label>
+                    <select name="status">
+                        <option value="">جميع الحالات</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>قيد الانتظار</option>
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>مفعّل</option>
+                        <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>منتهي</option>
+                        <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>مرفوض</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-primary btn-sm">
+                        <i class="fa-solid fa-search"></i> تطبيق
+                    </button>
+                    <a href="{% url 'panel:access' %}" class="btn-outline btn-sm">
+                        <i class="fa-solid fa-eraser"></i> مسح
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- الجدول -->
+    <div class="info-card">
+        {% if access_codes %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>رقم الطلب</th>
+                        <th>الكود</th>
+                        <th>الاسم</th>
+                        <th>الهاتف</th>
+                        <th>الاستخدام</th>
+                        <th>الحالة</th>
+                        <th>التاريخ</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for code in access_codes %}
+                    <tr id="row-{{ code.pk }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td><code>{{ code.request_code }}</code></td>
+                        <td>
+                            {% if code.code %}
+                                <strong style="color:#1e40af; font-family:monospace;">{{ code.code }}</strong>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ code.full_name }}</strong>
+                        </td>
+                        <td>
+                            <small>{{ code.phone_number }}</small>
+                        </td>
+                        <td>
+                            <span class="status-badge status-reviewed">
+                                {{ code.current_uses }}/{{ code.max_uses }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ code.status }}">
+                                {{ code.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <small>{{ code.created_at|date:"Y-m-d" }}</small>
+                        </td>
+                        <td>
+                            {% if code.status == 'pending' %}
+                                <button class="action-btn btn-view" 
+                                        onclick="approveCode({{ code.pk }})" 
+                                        title="موافقة وإنشاء كود"
+                                        style="background:#d1fae5; color:#065f46;">
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-key"></i>
+            <h3>لا توجد أكواد</h3>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+function getCookie(name) {
+    let v = null;
+    if (document.cookie) {
+        const cs = document.cookie.split(';');
+        for (let i = 0; i < cs.length; i++) {
+            const c = cs[i].trim();
+            if (c.substring(0, name.length + 1) === (name + '=')) {
+                v = decodeURIComponent(c.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return v;
+}
+
+function approveCode(pk) {
+    if (!confirm('هل تريد الموافقة على الطلب وإنشاء كود؟')) return;
+
+    fetch(`/panel/access/${pk}/approve/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert(`✅ تم إنشاء الكود:\n\n${data.code}\n\nرقم العميل: ${data.phone}\n\nسيتم فتح واتساب لإرسال الكود`);
+            // فتح واتساب
+            const msg = `مرحباً،\n\nتم تفعيل اشتراكك في منصة سند الطالب ✅\n\n🔑 كود الوصول:\n${data.code}\n\nللاستخدام:\n1. افتح: /access/activate/\n2. أدخل الكود ورقم هاتفك`;
+            window.open(`https://wa.me/${data.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            // إعادة تحميل الصفحة
+            location.reload();
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+</script>
+
+{% endblock %}

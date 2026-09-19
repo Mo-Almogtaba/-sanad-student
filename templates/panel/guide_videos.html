@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}الفيديوهات التعليمية - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/panel.css' %}">
+
+<div class="page-hero">
+    <h1>🎥 الفيديوهات التعليمية</h1>
+    <p>إجمالي: {{ total }} فيديو</p>
+</div>
+
+<div class="container py-5">
+
+    <div class="panel-toolbar">
+        <a href="{% url 'panel:guide_sections' %}" class="btn-outline btn-sm">
+            <i class="fa-solid fa-arrow-right"></i> العودة للأقسام
+        </a>
+        <button class="btn-primary btn-sm" onclick="openAddModal()">
+            <i class="fa-solid fa-plus"></i> فيديو جديد
+        </button>
+    </div>
+
+    <!-- معلومات -->
+    <div class="info-card mb-4" style="background: linear-gradient(135deg, #fef3c7, #fef9e7); border: 2px solid #fbbf24;">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <i class="fa-brands fa-youtube" style="color:#dc2626; font-size:1.8rem;"></i>
+            <div>
+                <strong style="color:#92400e;">تلميح:</strong>
+                <span style="color:#475569;"> الصق رابط يوتيوب فقط — سيتم استخراج معرف الفيديو تلقائياً.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- القائمة -->
+    <div class="info-card">
+        {% if videos %}
+        <div class="videos-grid-panel">
+            {% for video in videos %}
+            <div class="video-item-panel" id="row-{{ video.pk }}">
+                <div class="video-thumb">
+                    <img src="https://img.youtube.com/vi/{{ video.youtube_id }}/mqdefault.jpg" 
+                         alt="{{ video.title }}">
+                    <a href="{{ video.youtube_url }}" target="_blank" class="play-overlay">
+                        <i class="fa-solid fa-play"></i>
+                    </a>
+                </div>
+                <div class="video-info-panel">
+                    <h4>{{ video.title }}</h4>
+                    {% if video.description %}
+                        <p>{{ video.description|truncatechars:80 }}</p>
+                    {% endif %}
+                    <div class="video-meta-panel">
+                        <span><i class="fa-solid fa-sort"></i> {{ video.order }}</span>
+                        <span class="status-badge {% if video.is_active %}status-accepted{% else %}status-rejected{% endif %}">
+                            {% if video.is_active %}✅ مفعّل{% else %}⏸️ معطّل{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="video-actions-panel">
+                    <button class="action-btn" onclick="deleteVideo({{ video.pk }}, '{{ video.title|escapejs }}')" 
+                            title="حذف" style="background:#fee2e2; color:#991b1b;">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-brands fa-youtube"></i>
+            <h3>لا توجد فيديوهات</h3>
+            <p>ابدأ بإضافة فيديو توضيحي</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Modal: إضافة فيديو -->
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">➕ فيديو جديد</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addForm">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">عنوان الفيديو *</label>
+                        <input type="text" name="title" class="form-control" required 
+                               placeholder="مثال: كيف تقدم عبر المنصة">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">رابط يوتيوب *</label>
+                        <input type="url" name="youtube_url" class="form-control" required 
+                               placeholder="https://www.youtube.com/watch?v=...">
+                        <small class="text-muted">الصق رابط يوتيوب فقط</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الوصف</label>
+                        <textarea name="description" class="form-control" rows="2" 
+                                  placeholder="وصف مختصر عن الفيديو"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">الترتيب</label>
+                            <input type="number" name="order" class="form-control" value="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">&nbsp;</label>
+                            <div class="form-check" style="padding-top:10px;">
+                                <input type="checkbox" name="is_active" class="form-check-input" 
+                                       id="video_is_active" checked>
+                                <label class="form-check-label" for="video_is_active">
+                                    مفعّل
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary w-100" onclick="createVideo()">
+                    <i class="fa-solid fa-save"></i> إضافة الفيديو
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.videos-grid-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+}
+.video-item-panel {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+.video-item-panel:hover {
+    background: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+.video-thumb {
+    position: relative;
+    width: 100%;
+    height: 160px;
+    background: #000;
+    overflow: hidden;
+}
+.video-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.3);
+    color: white;
+    font-size: 2.5rem;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+.play-overlay:hover {
+    background: rgba(0,0,0,0.5);
+    color: #fbbf24;
+    transform: scale(1.1);
+}
+.video-info-panel {
+    padding: 12px 15px;
+}
+.video-info-panel h4 {
+    margin: 0 0 6px 0;
+    font-size: 0.95rem;
+    color: #1e293b;
+    font-weight: 700;
+}
+.video-info-panel p {
+    margin: 0 0 8px 0;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+.video-meta-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+.video-actions-panel {
+    padding: 0 15px 12px;
+    display: flex;
+    justify-content: flex-end;
+}
+</style>
+
+<script>
+function getCookie(name) {
+    let v = null;
+    if (document.cookie) {
+        const cs = document.cookie.split(';');
+        for (let i = 0; i < cs.length; i++) {
+            const c = cs[i].trim();
+            if (c.substring(0, name.length + 1) === (name + '=')) {
+                v = decodeURIComponent(c.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return v;
+}
+
+function openAddModal() {
+    document.getElementById('addForm').reset();
+    new bootstrap.Modal(document.getElementById('addModal')).show();
+}
+
+function createVideo() {
+    const form = document.getElementById('addForm');
+    const formData = new FormData(form);
+
+    fetch('{% url "panel:guide_video_create" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ تم إضافة الفيديو');
+            location.reload();
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+
+function deleteVideo(pk, title) {
+    if (!confirm(`هل أنت متأكد من حذف "${title}"؟`)) return;
+
+    fetch(`/panel/guide/videos/${pk}/delete/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`row-${pk}`).remove();
+            alert('✅ تم الحذف');
+        }
+    })
+    .catch(() => alert('❌ خطأ'));
+}
+</script>
+
+{% endblock %}

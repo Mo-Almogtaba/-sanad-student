@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إدارة الفريق - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/panel.css' %}">
+
+<div class="page-hero">
+    <h1>👥 إدارة الفريق</h1>
+    <p>إجمالي الأعضاء: {{ users.count }}</p>
+</div>
+
+<div class="container py-5">
+
+    <div class="panel-toolbar">
+        <a href="{% url 'panel:dashboard' %}" class="btn-outline btn-sm">
+            <i class="fa-solid fa-arrow-right"></i> العودة
+        </a>
+        <button class="btn-primary btn-sm" onclick="openAddModal()">
+            <i class="fa-solid fa-user-plus"></i> إضافة عضو
+        </button>
+    </div>
+
+    <!-- قائمة الأعضاء -->
+    <div class="info-card">
+        <div class="info-card-header">
+            <i class="fa-solid fa-users"></i>
+            <h3>أعضاء الفريق</h3>
+        </div>
+
+        {% for u in users %}
+        <div class="team-member">
+            <div class="member-info">
+                <h6>
+                    {{ u.get_full_name|default:u.username }}
+                    {% if u == request.user %}
+                        <span class="status-badge status-accepted" style="font-size:0.7rem;">أنت</span>
+                    {% endif %}
+                </h6>
+                <small>
+                    @{{ u.username }}
+                    {% if u.email %} • {{ u.email }}{% endif %}
+                    • 
+                    {% if u.profile.is_active %}
+                        <span style="color:#10b981;">✅ نشط</span>
+                    {% else %}
+                        <span style="color:#ef4444;">❌ معطّل</span>
+                    {% endif %}
+                </small>
+                <div style="margin-top:8px;">
+                    <span class="role-badge role-{{ u.profile.role }}">
+                        {{ u.profile.get_role_display }}
+                    </span>
+                    {% if not u.profile.is_super_admin %}
+                        {% for section in u.profile.sections.all %}
+                            <span class="badge-mini" style="margin-right:5px;">
+                                {{ section.name }}
+                            </span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            <div>
+                <button class="action-btn btn-view" onclick="openEditModal({{ u.pk }})" 
+                        title="تعديل" style="background:#dbeafe; color:#1e40af;">
+                    <i class="fa-solid fa-edit"></i>
+                </button>
+                {% if u != request.user %}
+                <button class="action-btn" onclick="toggleUser({{ u.pk }})" 
+                        title="{% if u.profile.is_active %}تعطيل{% else %}تفعيل{% endif %}"
+                        style="background:#fee2e2; color:#991b1b;">
+                    <i class="fa-solid fa-{% if u.profile.is_active %}ban{% else %}check{% endif %}"></i>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- Modal: إضافة عضو -->
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">➕ إضافة عضو جديد</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">اسم المستخدم *</label>
+                            <input type="text" name="username" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">كلمة المرور *</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">الاسم الكامل</label>
+                            <input type="text" name="full_name" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">البريد الإلكتروني</label>
+                            <input type="email" name="email" class="form-control">
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold">الدور *</label>
+                            <select name="role" class="form-select" onchange="toggleSections(this, 'addSections')">
+                                <option value="staff">موظف</option>
+                                <option value="team_lead">قائد فريق</option>
+                                <option value="super_admin">مدير عام</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 mb-3" id="addSections">
+                            <label class="form-label fw-bold">الأقسام المصرح بها</label>
+                            {% for section in sections %}
+                                <div class="form-check">
+                                    <input type="checkbox" name="sections" value="{{ section.id }}" 
+                                           class="form-check-input" id="add_sec_{{ section.id }}">
+                                    <label class="form-check-label" for="add_sec_{{ section.id }}">
+                                        {{ section.name }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary w-100" onclick="createUser()">
+                    <i class="fa-solid fa-check"></i> إنشاء الحساب
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: تعديل عضو -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">✏️ تعديل الصلاحيات</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" name="user_id" id="edit_user_id">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الدور *</label>
+                        <select name="role" id="edit_role" class="form-select" onchange="toggleSections(this, 'editSections')">
+                            <option value="staff">موظف</option>
+                            <option value="team_lead">قائد فريق</option>
+                            <option value="super_admin">مدير عام</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="editSections">
+                        <label class="form-label fw-bold">الأقسام المصرح بها</label>
+                        {% for section in sections %}
+                            <div class="form-check">
+                                <input type="checkbox" name="sections" value="{{ section.id }}" 
+                                       class="form-check-input edit-section-cb" 
+                                       data-section-id="{{ section.id }}">
+                                <label class="form-check-label">{{ section.name }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" name="is_active" id="edit_is_active" class="form-check-input">
+                            <label class="form-check-label" for="edit_is_active">
+                                الحساب نشط
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary w-100" onclick="updateUser()">
+                    <i class="fa-solid fa-save"></i> حفظ التعديلات
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const usersData = {
+    {% for u in users %}
+    {{ u.pk }}: {
+        role: "{{ u.profile.role }}",
+        sections: [{% for s in u.profile.sections.all %}{{ s.id }},{% endfor %}],
+        is_active: {{ u.profile.is_active|yesno:"true,false" }},
+    },
+    {% endfor %}
+};
+
+function getCookie(name) {
+    let v = null;
+    if (document.cookie) {
+        const cs = document.cookie.split(';');
+        for (let i = 0; i < cs.length; i++) {
+            const c = cs[i].trim();
+            if (c.substring(0, name.length + 1) === (name + '=')) {
+                v = decodeURIComponent(c.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return v;
+}
+
+function toggleSections(select, containerId) {
+    const container = document.getElementById(containerId);
+    container.style.display = select.value === 'super_admin' ? 'none' : 'block';
+}
+
+function openAddModal() {
+    document.getElementById('addForm').reset();
+    new bootstrap.Modal(document.getElementById('addModal')).show();
+}
+
+function openEditModal(userId) {
+    const data = usersData[userId];
+    document.getElementById('edit_user_id').value = userId;
+    document.getElementById('edit_role').value = data.role;
+    document.getElementById('edit_is_active').checked = data.is_active;
+
+    // Uncheck all
+    document.querySelectorAll('.edit-section-cb').forEach(cb => cb.checked = false);
+    // Check selected
+    data.sections.forEach(sid => {
+        const cb = document.querySelector(`.edit-section-cb[data-section-id="${sid}"]`);
+        if (cb) cb.checked = true;
+    });
+
+    toggleSections(document.getElementById('edit_role'), 'editSections');
+    new bootstrap.Modal(document.getElementById('editModal')).show();
+}
+
+function createUser() {
+    const form = document.getElementById('addForm');
+    const formData = new FormData(form);
+
+    fetch('{% url "panel:team_create" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ تم إنشاء الحساب بنجاح');
+            location.reload();
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+
+function updateUser() {
+    const userId = document.getElementById('edit_user_id').value;
+    const form = document.getElementById('editForm');
+    const formData = new FormData(form);
+    formData.delete('user_id');
+
+    fetch(`/panel/team/${userId}/update/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ تم التحديث');
+            location.reload();
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+
+function toggleUser(userId) {
+    if (!confirm('هل أنت متأكد؟')) return;
+
+    fetch(`/panel/team/${userId}/toggle/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('❌ ' + data.error);
+        }
+    })
+    .catch(() => alert('❌ خطأ في الاتصال'));
+}
+</script>
+
+{% endblock %}

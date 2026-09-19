@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تسجيل الدخول - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<div class="page-hero">
+    <h1>🔐 تسجيل الدخول</h1>
+    <p>لوحة إدارة {{ SITE_NAME }}</p>
+</div>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+
+            {% if messages %}
+                {% for msg in messages %}
+                    <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="login-card">
+                <div class="login-icon">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+
+                <h2>دخول المشرفين</h2>
+                <p class="login-subtitle">أدخل بياناتك للوصول إلى لوحة التحكم</p>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label>
+                            <i class="fa-solid fa-user"></i>
+                            اسم المستخدم
+                        </label>
+                        <input type="text" name="username" 
+                               placeholder="اكتب اسم المستخدم" 
+                               required autofocus>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <i class="fa-solid fa-lock"></i>
+                            كلمة المرور
+                        </label>
+                        <input type="password" name="password" 
+                               placeholder="اكتب كلمة المرور" 
+                               required>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fa-solid fa-sign-in-alt"></i>
+                        دخول
+                    </button>
+                </form>
+
+                <div class="login-warning">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    للأعضاء المعتمدين فقط
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'home:index' %}" class="btn-outline" style="display:inline-flex;">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    العودة للرئيسية
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

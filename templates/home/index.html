@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ SITE_NAME }} - الرئيسية{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<!-- Hero -->
+<section class="hero-section {% if HERO_BACKGROUND %}hero-with-bg{% endif %}"
+         {% if HERO_BACKGROUND %}style="background-image: url('{{ HERO_BACKGROUND }}');"{% endif %}>
+    
+    {% if HERO_BACKGROUND %}
+    <div class="hero-overlay" style="background: rgba(15, 23, 42, {{ HERO_OVERLAY_OPACITY }});"></div>
+    {% endif %}
+
+    <div class="hero-container">
+        <div class="hero-badge">
+            {{ HERO_BADGE }}
+        </div>
+        <h1 class="hero-title">
+            {{ HERO_TITLE }}
+        </h1>
+        <p class="hero-subtitle">
+            {{ HERO_DESCRIPTION }}
+        </p>
+
+        <div class="hero-actions">
+            <a href="{% url 'ranks:index' %}" class="btn-primary">
+                <i class="fa-solid {{ HERO_BTN1_ICON }}"></i>
+                {{ HERO_BTN1_TEXT }}
+            </a>
+            <a href="{% url 'admission:index' %}" class="btn-outline">
+                <i class="fa-solid {{ HERO_BTN2_ICON }}"></i>
+                {{ HERO_BTN2_TEXT }}
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ============ البانر المتحرك (Slider) ============ -->
+{% if announcements %}
+<section class="announcements-section">
+    <div class="container">
+        <div class="announcement-slider" id="announcementSlider">
+            
+            {% for ann in announcements %}
+            <div class="announcement-slide {% if forloop.first %}active{% endif %}" 
+                 data-index="{{ forloop.counter0 }}">
+                
+                {% if ann.image %}
+                    <div class="announcement-bg" style="background-image: url('{{ ann.image.url }}');"></div>
+                    <div class="announcement-overlay"></div>
+                {% else %}
+                    <div class="announcement-bg" style="background: {{ ann.bg_color }};"></div>
+                {% endif %}
+
+                <div class="announcement-content">
+                    <h2>{{ ann.title }}</h2>
+                    {% if ann.description %}
+                        <p>{{ ann.description }}</p>
+                    {% endif %}
+                    {% if ann.link %}
+                        <a href="{{ ann.link }}" class="announcement-btn">
+                            {{ ann.button_text|default:"اعرف المزيد" }}
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- أسهم التنقل -->
+            {% if announcements|length > 1 %}
+            <button class="slider-arrow slider-prev" onclick="slideAnnouncement(-1)" aria-label="السابق">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            <button class="slider-arrow slider-next" onclick="slideAnnouncement(1)" aria-label="التالي">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+
+            <!-- النقاط -->
+            <div class="slider-dots">
+                {% for ann in announcements %}
+                <button class="slider-dot {% if forloop.first %}active{% endif %}" 
+                        onclick="goToAnnouncement({{ forloop.counter0 }})"></button>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>كل ما تحتاجه في مكان واحد</h2>
+            <p>اختر الخدمة التي تريد البدء بها واستكشف كل التفاصيل بسهولة.</p>
+        </div>
+
+        <div class="row g-4">
+
+            <!-- التقديم الإلكتروني -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{% url 'admission:index' %}" class="feature-card">
+                    <div class="feature-icon blue">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+                    <h3>التقديم الإلكتروني</h3>
+                    <p>قدّم طلبك إلكترونياً وارفع مستنداتك بخطوات بسيطة.</p>
+                    <span class="feature-btn">استكشف ←</span>
+                </a>
+            </div>
+
+            <!-- ترتيب الرغبات -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{% url 'ranks:index' %}" class="feature-card">
+                    <div class="feature-icon green">
+                        <i class="fa-solid fa-list-ol"></i>
+                    </div>
+                    <h3>ترتيب الرغبات</h3>
+                    <p>رتّب رغباتك وتوقّع فرص قبولك في الجامعات.</p>
+                    <span class="feature-btn">استكشف ←</span>
+                </a>
+            </div>
+
+            <!-- المنح الدراسية -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{% url 'scholarships:index' %}" class="feature-card">
+                    <div class="feature-icon orange">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <h3>المنح الدراسية</h3>
+                    <p>اكتشف منحاً محلية ودولية ممولة كلياً أو جزئياً.</p>
+                    <span class="feature-btn">استكشف ←</span>
+                </a>
+            </div>
+
+            <!-- الشهادات والتوثيق -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{% url 'certificates:index' %}" class="feature-card">
+                    <div class="feature-icon purple">
+                        <i class="fa-solid fa-certificate"></i>
+                    </div>
+                    <h3>الشهادات والتوثيق</h3>
+                    <p>استخراج وتوثيق وترجمة الشهادات الثانوية والجامعية.</p>
+                    <span class="feature-btn">استكشف ←</span>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- How it works -->
+<section class="how-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>كيف نعمل؟</h2>
+            <p>4 خطوات فقط للبدء</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="how-card">
+                    <div class="how-number">1</div>
+                    <h4>سجّل أو ابدأ مباشرة</h4>
+                    <p>لا تحتاج تسجيل دخول لكل الخدمات</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="how-card">
+                    <div class="how-number">2</div>
+                    <h4>اختر الخدمة</h4>
+                    <p>حدد ما تحتاجه من خدماتنا</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="how-card">
+                    <div class="how-number">3</div>
+                    <h4>أكمل البيانات</h4>
+                    <p>املأ النموذج وأرفق مستنداتك</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="how-card">
+                    <div class="how-number">4</div>
+                    <h4>تواصل وتابع</h4>
+                    <p>سنتواصل معك عبر واتساب فوراً</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+{% if announcements %}
+<script>
+// =========================================================
+// Slider الإعلانات
+// =========================================================
+let currentSlide = 0;
+const slides = document.querySelectorAll('.announcement-slide');
+const dots = document.querySelectorAll('.slider-dot');
+const totalSlides = slides.length;
+let autoSlideInterval;
+
+function showSlide(index) {
+    // Wrap around
+    if (index < 0) index = totalSlides - 1;
+    if (index >= totalSlides) index = 0;
+
+    // إخفاء الكل
+    slides.forEach(s => s.classList.remove('active'));
+    dots.forEach(d => d.classList.remove('active'));
+
+    // إظهار الحالي
+    slides[index].classList.add('active');
+    if (dots[index]) dots[index].classList.add('active');
+
+    currentSlide = index;
+}
+
+function slideAnnouncement(direction) {
+    showSlide(currentSlide + direction);
+    resetAutoSlide();
+}
+
+function goToAnnouncement(index) {
+    showSlide(index);
+    resetAutoSlide();
+}
+
+function startAutoSlide() {
+    if (totalSlides > 1) {
+        autoSlideInterval = setInterval(() => {
+            showSlide(currentSlide + 1);
+        }, 5000); // كل 5 ثواني
+    }
+}
+
+function resetAutoSlide() {
+    clearInterval(autoSlideInterval);
+    startAutoSlide();
+}
+
+// بدء التشغيل
+document.addEventListener('DOMContentLoaded', function() {
+    if (totalSlides > 0) {
+        showSlide(0);
+        startAutoSlide();
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

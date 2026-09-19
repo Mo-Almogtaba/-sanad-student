@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}طلبات الشهادات - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/panel.css' %}">
+
+<div class="page-hero">
+    <h1>📜 طلبات الشهادات</h1>
+    <p>إجمالي: {{ total }} طلب</p>
+</div>
+
+<div class="container py-5">
+
+    <div class="panel-toolbar">
+        <div class="toolbar-left">
+            <a href="{% url 'panel:dashboard' %}" class="btn-outline btn-sm">
+                <i class="fa-solid fa-arrow-right"></i> العودة
+            </a>
+        </div>
+    </div>
+
+    <!-- الفلاتر -->
+    <div class="filter-card">
+        <form method="get" class="filter-form">
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label>🔍 بحث</label>
+                    <input type="text" name="q" value="{{ search }}" 
+                           placeholder="الاسم، الرقم...">
+                </div>
+
+                <div class="filter-item">
+                    <label>الحالة</label>
+                    <select name="status">
+                        <option value="">جميع الحالات</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>جديد</option>
+                        <option value="processing" {% if status_filter == 'processing' %}selected{% endif %}>قيد التنفيذ</option>
+                        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>مكتمل</option>
+                        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>ملغي</option>
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <label>نوع الخدمة</label>
+                    <select name="service">
+                        <option value="">جميع الخدمات</option>
+                        {% for code, name in services %}
+                            <option value="{{ code }}" {% if service_filter == code %}selected{% endif %}>
+                                {{ name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-primary btn-sm">
+                        <i class="fa-solid fa-search"></i> تطبيق
+                    </button>
+                    <a href="{% url 'panel:certificates' %}" class="btn-outline btn-sm">
+                        <i class="fa-solid fa-eraser"></i> مسح
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- الجدول -->
+    <div class="info-card">
+        {% if certificates %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>رقم الطلب</th>
+                        <th>الاسم</th>
+                        <th>الخدمة</th>
+                        <th>الحالة</th>
+                        <th>التاريخ</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cert in certificates %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <a href="{% url 'panel:certificate_detail' cert.pk %}" class="code-link">
+                                {{ cert.request_code }}
+                            </a>
+                        </td>
+                        <td>
+                            <strong>{{ cert.full_name }}</strong>
+                            <br>
+                            <small class="text-muted">{{ cert.phone_number }}</small>
+                        </td>
+                        <td>
+                            <span class="type-badge type-bachelor">
+                                {{ cert.service_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ cert.status }}">
+                                {{ cert.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <small>{{ cert.submitted_at|date:"Y-m-d" }}</small>
+                            <br>
+                            <small class="text-muted">{{ cert.submitted_at|timesince }} مضت</small>
+                        </td>
+                        <td>
+                            <a href="{% url 'panel:certificate_detail' cert.pk %}" 
+                               class="action-btn btn-view" title="عرض">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-inbox"></i>
+            <h3>لا توجد طلبات</h3>
+            <p>لم يتم استلام أي طلبات بهذه المعايير</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}
