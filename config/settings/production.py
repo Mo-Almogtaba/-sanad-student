@@ -31,12 +31,20 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-# WhiteNoise لخدمة الملفات الثابتة
+# ✅ إزالة WhiteNoise من أي موقع موجود
+if 'whitenoise.middleware.WhiteNoiseMiddleware' in MIDDLEWARE:
+    MIDDLEWARE.remove('whitenoise.middleware.WhiteNoiseMiddleware')
+
+# ✅ إضافته بعد SecurityMiddleware مباشرة
 MIDDLEWARE.insert(
-    1,  # بعد SecurityMiddleware
+    MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,
     'whitenoise.middleware.WhiteNoiseMiddleware'
 )
 
+# ✅ إعدادات WhiteNoise
+WHITENOISE_ROOT = STATIC_ROOT
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = False
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # ===================== الأمان =====================
