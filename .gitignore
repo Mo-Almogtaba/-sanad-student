@@ -1,4 +1,4 @@
-# Python
+# ==================== Python ====================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -8,34 +8,32 @@ venv/
 env/
 ENV/
 
-# Django
+# ==================== Django ====================
 *.log
-db.sqlite3
-db.sqlite3.backup
-db.sqlite3.backup_*
+# db.sqlite3
+# db.sqlite3.backup
+# db.sqlite3.backup_*
 media/
 staticfiles/
 
-# Environment
+# ==================== Environment ====================
 .env
 .env.local
 
-# IDE
+# ==================== IDE ====================
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# OS
+# ==================== OS ====================
 .DS_Store
 Thumbs.db
 
-# Backups
+# ==================== Backups ====================
 *.bak
 *.backup
 backup_*.json
 
-# Scripts (تحتوي بيانات مؤقتة)
-import_*.py
-university_data.py
+# ==================== Scripts ====================
 project_dump.txt
